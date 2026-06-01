@@ -47,9 +47,9 @@
 	const current = $derived(periods.find((p) => p.name === selected) ?? periods[0]);
 </script>
 
-<div class="flex min-h-screen flex-col bg-neutral-50 text-neutral-900">
+<div class="bg-background text-ink flex min-h-screen flex-col">
 	<main class="flex-1 px-6 pt-10 pb-6">
-		<h1 class="mb-8 text-2xl font-semibold">Finn</h1>
+		<h1 class="text-primary-deep mb-8 text-2xl font-semibold">Finn</h1>
 
 		<ul class="space-y-6">
 			{#each current.budgets as budget (budget.primaryLabel)}
@@ -64,15 +64,15 @@
 		</ul>
 	</main>
 
-	<nav class="sticky bottom-0 grid grid-cols-3 gap-2 border-t border-neutral-200 bg-white p-4">
+	<nav class="border-ink/10 sticky bottom-0 grid grid-cols-3 gap-2 border-t bg-white p-4">
 		{#each periods as p (p.name)}
 			<button
 				type="button"
 				onclick={() => (selected = p.name)}
 				class="rounded-full px-4 py-3 text-sm font-medium transition-colors
 					{selected === p.name
-					? 'bg-neutral-900 text-white'
-					: 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}"
+					? 'bg-primary text-white'
+					: 'bg-ink/5 text-ink/70 hover:bg-ink/10'}"
 			>
 				{p.name}
 			</button>

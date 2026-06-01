@@ -10,17 +10,17 @@
 	const clamped = $derived(Math.max(0, Math.min(100, percentage)));
 
 	const color = $derived(
-		clamped >= 95 ? 'bg-red-500' : clamped >= 75 ? 'bg-amber-500' : 'bg-emerald-500'
+		clamped >= 95 ? 'bg-alert' : clamped >= 75 ? 'bg-highlight' : 'bg-accent'
 	);
 </script>
 
 <div>
 	<div class="mb-2 flex items-baseline justify-between">
 		<span class="font-medium">{primaryLabel}</span>
-		<span class="text-sm text-neutral-600">{secondaryLabel}</span>
+		<span class="text-ink/70 text-sm">{secondaryLabel}</span>
 	</div>
 	<div
-		class="h-3 w-full overflow-hidden rounded-full bg-neutral-200"
+		class="bg-ink/10 h-3 w-full overflow-hidden rounded-full"
 		role="progressbar"
 		aria-label={primaryLabel}
 		aria-valuenow={clamped}
