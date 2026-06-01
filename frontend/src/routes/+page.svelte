@@ -1,5 +1,7 @@
 <script lang="ts">
 	import ProgressBar from '$lib/components/ProgressBar.svelte';
+	import PeriodWheel from '$lib/components/PeriodWheel.svelte';
+	import { swipe } from '$lib/actions/swipe';
 
 	type Budget = {
 		primaryLabel: string;
@@ -42,13 +44,36 @@
 		}
 	];
 
-	let selected = $state(periods[0].name);
+	let selected = $state<string>(periods[0].name);
 
 	const current = $derived(periods.find((p) => p.name === selected) ?? periods[0]);
+
+	const wheelOptions = periods.map((p) => ({ name: p.name, label: p.name }));
+
+	function step(direction: -1 | 1) {
+		const idx = periods.findIndex((p) => p.name === selected);
+		const next = Math.max(0, Math.min(periods.length - 1, idx + direction));
+		selected = periods[next].name;
+	}
+
+	function onKeyDown(e: KeyboardEvent) {
+		if (e.key === 'ArrowLeft') {
+			e.preventDefault();
+			step(-1);
+		} else if (e.key === 'ArrowRight') {
+			e.preventDefault();
+			step(1);
+		}
+	}
 </script>
 
+<svelte:window onkeydown={onKeyDown} />
+
 <div class="bg-background text-ink flex min-h-screen flex-col">
-	<main class="flex-1 px-6 pt-10 pb-6">
+	<main
+		class="flex-1 px-6 pt-10 pb-6"
+		use:swipe={{ onLeft: () => step(1), onRight: () => step(-1) }}
+	>
 		<h1 class="text-primary-deep mb-8 text-2xl font-semibold">Finn</h1>
 
 		<ul class="space-y-6">
@@ -64,18 +89,7 @@
 		</ul>
 	</main>
 
-	<nav class="border-ink/10 sticky bottom-0 grid grid-cols-3 gap-2 border-t bg-white p-4">
-		{#each periods as p (p.name)}
-			<button
-				type="button"
-				onclick={() => (selected = p.name)}
-				class="rounded-full px-4 py-3 text-sm font-medium transition-colors
-					{selected === p.name
-					? 'bg-primary text-white'
-					: 'bg-ink/5 text-ink/70 hover:bg-ink/10'}"
-			>
-				{p.name}
-			</button>
-		{/each}
+	<nav class="border-ink/10 sticky bottom-0 border-t bg-white p-4">
+		<PeriodWheel options={wheelOptions} bind:value={selected} />
 	</nav>
 </div>
