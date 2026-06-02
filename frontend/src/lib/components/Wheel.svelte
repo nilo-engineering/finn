@@ -79,12 +79,14 @@
 		pressed = false;
 		target = null;
 		activePointerId = null;
+		centerEl?.blur()
 	}
 
 	function cancel() {
 		pressed = false;
 		target = null;
 		activePointerId = null;
+		centerEl?.blur()
 	}
 
 	function onPointerUp(e: PointerEvent) {
@@ -323,7 +325,7 @@
 		onpointerup={onPointerUp}
 		onpointercancel={onPointerCancel}
 		onkeydown={onCenterKeyDown}
-		class="border-primary text-primary-deep absolute top-1/2 left-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[2.5px] bg-white text-sm font-medium shadow-sm transition-transform duration-150 select-none
+		class="border-primary text-primary-deep outline-primary absolute top-1/2 left-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[2.5px] bg-white text-sm font-medium shadow-sm transition-transform duration-150 select-none
 			{pressed ? 'scale-95' : 'hover:scale-105'}"
 		style="touch-action: none;"
 	>
