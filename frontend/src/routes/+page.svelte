@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ProgressBar from '$lib/components/ProgressBar.svelte';
 	import Wheel from '$lib/components/Wheel.svelte';
-	import { swipe } from '$lib/actions/swipe';
 
 	type Budget = {
 		primaryLabel: string;
@@ -49,19 +48,10 @@
 	const current = $derived(periods.find((p) => p.name === selected) ?? periods[0]);
 
 	const wheelOptions = periods.map((p) => ({ name: p.name, label: p.name }));
-
-	function step(direction: -1 | 1) {
-		const idx = periods.findIndex((p) => p.name === selected);
-		const next = Math.max(0, Math.min(periods.length - 1, idx + direction));
-		selected = periods[next].name;
-	}
 </script>
 
 <div class="bg-background text-ink flex min-h-screen flex-col">
-	<main
-		class="flex-1 px-6 pt-10 pb-6"
-		use:swipe={{ onLeft: () => step(1), onRight: () => step(-1) }}
-	>
+	<main class="flex-1 px-6 pt-10 pb-6">
 		<h1 class="text-primary-deep mb-8 text-2xl font-semibold">Finn</h1>
 
 		<ul class="space-y-6">
@@ -77,7 +67,7 @@
 		</ul>
 	</main>
 
-	<nav class="border-ink/10 sticky bottom-0 border-t bg-white p-4">
+	<nav class="sticky bottom-0 p-4">
 		<Wheel options={wheelOptions} bind:value={selected} />
 	</nav>
 </div>
