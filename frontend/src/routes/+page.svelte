@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ProgressBar from '$lib/components/ProgressBar.svelte';
-	import PeriodWheel from '$lib/components/PeriodWheel.svelte';
+	import Wheel from '$lib/components/Wheel.svelte';
 	import { swipe } from '$lib/actions/swipe';
 
 	type Budget = {
@@ -55,19 +55,7 @@
 		const next = Math.max(0, Math.min(periods.length - 1, idx + direction));
 		selected = periods[next].name;
 	}
-
-	function onKeyDown(e: KeyboardEvent) {
-		if (e.key === 'ArrowLeft') {
-			e.preventDefault();
-			step(-1);
-		} else if (e.key === 'ArrowRight') {
-			e.preventDefault();
-			step(1);
-		}
-	}
 </script>
-
-<svelte:window onkeydown={onKeyDown} />
 
 <div class="bg-background text-ink flex min-h-screen flex-col">
 	<main
@@ -90,6 +78,6 @@
 	</main>
 
 	<nav class="border-ink/10 sticky bottom-0 border-t bg-white p-4">
-		<PeriodWheel options={wheelOptions} bind:value={selected} />
+		<Wheel options={wheelOptions} bind:value={selected} />
 	</nav>
 </div>
