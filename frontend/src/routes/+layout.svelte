@@ -8,6 +8,7 @@
 	let { children } = $props();
 </script>
 
+<svelte:head><title>Finn</title></svelte:head>
 {@render children()}
 
 <div style="display:none">
