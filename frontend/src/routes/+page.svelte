@@ -50,7 +50,7 @@
 	const wheelOptions = periods.map((p) => ({ name: p.name, label: p.name }));
 </script>
 
-<div class="bg-background text-ink flex min-h-screen flex-col">
+<div class="bg-background text-ink mx-auto flex min-h-screen w-full max-w-[500px] flex-col">
 	<main class="flex-1 px-6 pt-10 pb-6">
 		<h1 class="text-primary-deep mb-8 text-2xl font-semibold">Finn</h1>
 
