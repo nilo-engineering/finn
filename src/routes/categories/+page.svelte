@@ -3,6 +3,9 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import CreateCategoryForm from '$lib/components/CreateCategoryForm.svelte';
 	import EditCategoryForm from '$lib/components/EditCategoryForm.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import navArrowLeft from 'iconoir/icons/nav-arrow-left.svg?raw';
+	import editPencil from 'iconoir/icons/edit-pencil.svg?raw';
 	import { categoryList, updateBudgetPercentage } from '$lib/services/categories';
 	import { accentForClasses } from '$lib/categoryColors';
 	import type { CategoryView } from '$lib/services/types';
@@ -34,9 +37,7 @@
 	<main class="flex-1 px-6 pt-10 pb-6">
 		<div class="mb-8 flex items-center gap-3">
 			<a href={resolve('/')} aria-label="Back to dashboard" class="flex h-8 w-8 items-center justify-center rounded-full text-primary-deep hover:bg-ink/5">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
-					<polyline points="15 18 9 12 15 6" />
-				</svg>
+				<Icon src={navArrowLeft} class="h-5 w-5" />
 			</a>
 			<h1 class="text-2xl font-semibold text-primary-deep">Categories</h1>
 		</div>
@@ -49,10 +50,7 @@
 						<div class="flex items-center gap-2">
 							<span class="w-10 text-right text-sm font-medium text-ink/70">{category.budgetPercentage}%</span>
 							<button type="button" aria-label="Edit {category.name}" onclick={() => edit(category)} class="flex h-8 w-8 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
-									<path d="M12 20h9" />
-									<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-								</svg>
+								<Icon src={editPencil} class="h-4 w-4" />
 							</button>
 						</div>
 					</div>
