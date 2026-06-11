@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Account, Category, Transaction } from './types';
-import { seed } from './seed';
+// import { seed } from './seed';
 
 export type FinnDB = Dexie & {
 	accounts: EntityTable<Account, 'id'>;
@@ -22,4 +22,4 @@ db.version(1).stores({
 db.version(2).stores({ budgets: null });
 
 // Runs once, only when the DB is first created.
-db.on('populate', () => seed(db));
+// db.on('populate', () => seed(db));
