@@ -34,3 +34,9 @@ export type CategoryOption = {
 	name: string;
 	classes: string;
 };
+
+export type AccountView = {
+	id: number;
+	name: string;
+	txCount: number; // transactions referencing this account; >0 blocks delete
+};
