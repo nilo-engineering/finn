@@ -5,6 +5,11 @@ export function addTransaction(tx: Omit<Transaction, 'id' | 'createdAt'>) {
 	return db.transactions.add({ ...tx, createdAt: Date.now() });
 }
 
+export function bulkAddTransactions(txs: Omit<Transaction, 'id' | 'createdAt'>[]) {
+	const now = Date.now();
+	return db.transactions.bulkAdd(txs.map((tx) => ({ ...tx, createdAt: now })));
+}
+
 export function updateTransaction(id: number, changes: Partial<Transaction>) {
 	return db.transactions.update(id, changes);
 }

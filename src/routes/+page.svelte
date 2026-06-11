@@ -7,6 +7,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import label from 'iconoir/icons/label.svg?raw';
 	import bank from 'iconoir/icons/bank.svg?raw';
+	import importIcon from 'iconoir/icons/import.svg?raw';
 	import { budgetBars, periodOptions } from '$lib/services/dashboard';
 
 	let selected = $state('Year');
@@ -20,6 +21,9 @@
 		<div class="mb-8 flex items-center justify-between">
 			<h1 class="text-2xl font-semibold text-primary-deep">Finn</h1>
 			<div class="flex items-center gap-1">
+				<a href={resolve('/import')} aria-label="Import transactions" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
+					<Icon src={importIcon} class="h-5 w-5" />
+				</a>
 				<a href={resolve('/categories')} aria-label="Manage categories" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
 					<Icon src={label} class="h-5 w-5" />
 				</a>

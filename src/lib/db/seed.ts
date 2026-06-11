@@ -27,20 +27,90 @@ const incomeDeposits = ['01', '02', '03', '04', '05', '06'].map((month) => ({
 // Dates span the current week (Jun 7-13), the current month, and an earlier month
 // so the Week / Month / Year totals differ.
 const reviewedExpenses = [
-	{ title: 'Rent share', amount: 1200, date: '2026-06-08', account: 'NuBank', method: 'Debit', category: 'Fixed' },
-	{ title: 'Dinner out', amount: 90, date: '2026-06-09', account: 'BTG Pactual', method: 'Credit', category: 'Comfort' },
-	{ title: 'Headphones', amount: 150, date: '2026-06-10', account: 'NuBank', method: 'Credit', category: 'Indulgences' },
-	{ title: 'Online course', amount: 60, date: '2026-06-07', account: 'NuBank', method: 'Credit', category: 'Self Improvement' },
-	{ title: 'Internet bill', amount: 80, date: '2026-06-02', account: 'CAIXA', method: 'Debit', category: 'Fixed' },
-	{ title: 'Concert tickets', amount: 300, date: '2026-03-15', account: 'BTG Pactual', method: 'Credit', category: 'Comfort' }
+	{
+		title: 'Rent share',
+		amount: 1200,
+		date: '2026-06-08',
+		account: 'NuBank',
+		method: 'Debit',
+		category: 'Fixed'
+	},
+	{
+		title: 'Dinner out',
+		amount: 90,
+		date: '2026-06-09',
+		account: 'BTG Pactual',
+		method: 'Credit',
+		category: 'Comfort'
+	},
+	{
+		title: 'Headphones',
+		amount: 150,
+		date: '2026-06-10',
+		account: 'NuBank',
+		method: 'Credit',
+		category: 'Indulgences'
+	},
+	{
+		title: 'Online course',
+		amount: 60,
+		date: '2026-06-07',
+		account: 'NuBank',
+		method: 'Credit',
+		category: 'Self Improvement'
+	},
+	{
+		title: 'Internet bill',
+		amount: 80,
+		date: '2026-06-02',
+		account: 'CAIXA',
+		method: 'Debit',
+		category: 'Fixed'
+	},
+	{
+		title: 'Concert tickets',
+		amount: 300,
+		date: '2026-03-15',
+		account: 'BTG Pactual',
+		method: 'Credit',
+		category: 'Comfort'
+	}
 ];
 
 // Pending money-out transactions awaiting categorization (review-flow demo).
 const pendingOutflows = [
-	{ title: 'Coffee shop', description: 'Morning latte at Blue Bottle', amount: 6.5, date: '2026-06-06', account: 'NuBank', method: 'Credit' },
-	{ title: 'Spotify', description: 'Monthly subscription', amount: 19.9, date: '2026-06-04', account: 'NuBank', method: 'Credit' },
-	{ title: 'Uber', description: 'Ride home from office', amount: 14.2, date: '2026-06-03', account: 'BTG Pactual', method: 'Debit' },
-	{ title: 'Grocery store', description: 'Weekly groceries at Pão de Açúcar', amount: 87.4, date: '2026-06-02', account: 'CAIXA', method: 'Debit' }
+	{
+		title: 'Coffee shop',
+		description: 'Morning latte at Blue Bottle',
+		amount: 6.5,
+		date: '2026-06-06',
+		account: 'NuBank',
+		method: 'Credit'
+	},
+	{
+		title: 'Spotify',
+		description: 'Monthly subscription',
+		amount: 19.9,
+		date: '2026-06-04',
+		account: 'NuBank',
+		method: 'Credit'
+	},
+	{
+		title: 'Uber',
+		description: 'Ride home from office',
+		amount: 14.2,
+		date: '2026-06-03',
+		account: 'BTG Pactual',
+		method: 'Debit'
+	},
+	{
+		title: 'Grocery store',
+		description: 'Weekly groceries at Pão de Açúcar',
+		amount: 87.4,
+		date: '2026-06-02',
+		account: 'CAIXA',
+		method: 'Debit'
+	}
 ];
 
 /**
@@ -63,6 +133,7 @@ export async function seed(db: FinnDB): Promise<void> {
 		title: 'Salary',
 		description: 'Monthly salary',
 		date: d.date,
+		time: '00:00',
 		accountId: accountIdByName.get(d.account)!,
 		categoryId: null,
 		method: 'Deposit',
@@ -76,6 +147,7 @@ export async function seed(db: FinnDB): Promise<void> {
 		title: e.title,
 		description: e.title,
 		date: e.date,
+		time: '00:00',
 		accountId: accountIdByName.get(e.account)!,
 		categoryId: categoryIdByName.get(e.category)!,
 		method: e.method,
@@ -89,6 +161,7 @@ export async function seed(db: FinnDB): Promise<void> {
 		title: tx.title,
 		description: tx.description,
 		date: tx.date,
+		time: '00:00',
 		accountId: accountIdByName.get(tx.account)!,
 		categoryId: null,
 		method: tx.method,

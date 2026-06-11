@@ -21,9 +21,11 @@ export interface Transaction {
 	title: string;
 	description: string;
 	date: string; // ISO 'YYYY-MM-DD'
+	time: string; // 'HH:mm' (24h); '00:00' when the source has no time component
 	accountId: number; // FK -> Account.id
 	categoryId: number | null; // FK -> Category.id; null until reviewed
 	method: string; // 'Credit' | 'Debit'
 	status: TxStatus; // 'pending' until categorized, then 'reviewed'
 	createdAt: number; // Date.now() at insert
+	sourceRow?: string; // original raw CSV line; only set on import
 }
