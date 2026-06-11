@@ -40,3 +40,11 @@ export type AccountView = {
 	name: string;
 	txCount: number; // transactions referencing this account; >0 blocks delete
 };
+
+export type CategoryView = {
+	id: number;
+	name: string;
+	classes: string;
+	budgetPercentage: number;
+	txCount: number; // transactions referencing this category; >0 blocks delete
+};
