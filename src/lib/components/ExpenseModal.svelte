@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { SvelteSet } from 'svelte/reactivity';
 	import { pendingExpenseCards, categoryOptions, reviewExpense } from '$lib/services/expenses';
+	import Icon from '$lib/components/Icon.svelte';
+	import skipNext from 'iconoir/icons/skip-next.svg?raw';
 
 	type Props = {
 		open: boolean;
@@ -14,23 +17,36 @@
 
 	let dialogEl: HTMLDialogElement | undefined = $state();
 
+	// Session-local so skipped expenses stay `pending` in the DB and resurface in the
+	// next review session, rather than being dismissed for good.
+	const skipped = new SvelteSet<number>();
+
 	$effect(() => {
 		if (!dialogEl) return;
 		if (open && !dialogEl.open) {
+			skipped.clear();
 			dialogEl.showModal();
 		} else if (!open && dialogEl.open) {
 			dialogEl.close();
 		}
 	});
 
-	// `cards` is the live list of pending items; reviewing one drops it from the
-	// list, so the next pending item becomes `current` automatically.
-	const current = $derived(cards[0]);
+	const queue = $derived(cards.filter((c) => !skipped.has(c.id)));
+	const current = $derived(queue[0]);
 
 	async function selectCategory(categoryId: number) {
 		if (!current) return;
-		const wasLast = cards.length === 1;
+		const wasLast = queue.length === 1;
 		await reviewExpense(current.id, categoryId);
+		if (wasLast) {
+			open = false;
+		}
+	}
+
+	function skip() {
+		if (!current) return;
+		const wasLast = queue.length === 1;
+		skipped.add(current.id);
 		if (wasLast) {
 			open = false;
 		}
@@ -55,13 +71,13 @@
 >
 	{#if current}
 		<div class="relative">
-			{#if cards.length > 2}
+			{#if queue.length > 2}
 				<div
 					aria-hidden="true"
 					class="absolute inset-x-6 -bottom-3 h-6 rounded-2xl border border-ink/10 bg-white shadow-sm"
 				></div>
 			{/if}
-			{#if cards.length > 1}
+			{#if queue.length > 1}
 				<div
 					aria-hidden="true"
 					class="absolute inset-x-3 -bottom-2 h-6 rounded-2xl border border-ink/10 bg-white shadow-sm"
@@ -72,7 +88,7 @@
 				<div class="flex items-start justify-between gap-3">
 					<h2 class="text-lg font-semibold text-primary-deep">{current.title}</h2>
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-ink/50">{cards.length} left</span>
+						<span class="text-xs text-ink/50">{queue.length} left</span>
 					</div>
 				</div>
 
@@ -96,6 +112,15 @@
 						</button>
 					{/each}
 				</div>
+
+				<button
+					type="button"
+					onclick={skip}
+					class="mt-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-ink/60 transition-colors hover:bg-ink/5 hover:text-ink"
+				>
+					<Icon src={skipNext} class="h-4 w-4" />
+					Skip for now
+				</button>
 			</div>
 		</div>
 	{/if}
