@@ -1,6 +1,5 @@
 export type Direction = 'in' | 'out';
 export type TxStatus = 'pending' | 'reviewed';
-export type Period = 'Year' | 'Month' | 'Week';
 
 export interface Account {
 	id?: number;
@@ -12,13 +11,7 @@ export interface Category {
 	id?: number;
 	name: string; // 'Fixed', 'Comfort', 'Indulgences', 'Self Improvement'
 	classes: string; // Tailwind classes used to style the category
-}
-
-export interface Budget {
-	id?: number;
-	period: Period;
-	categoryId: number; // FK -> Category.id
-	limit: number; // spending limit for that category + period
+	budgetPercentage: number; // 0-100; this category's share of the period budget
 }
 
 export interface Transaction {

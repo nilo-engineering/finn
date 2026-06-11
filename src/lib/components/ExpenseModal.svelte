@@ -1,28 +1,18 @@
 <script lang="ts">
-	type Expense = {
-		title: string;
-		description: string;
-		value: number;
-		date: string;
-		bank: string;
-		transactionType: string;
-	};
+	import { pendingExpenseCards, categoryOptions, reviewExpense } from '$lib/services/expenses';
 
 	type Props = {
 		open: boolean;
-		expenses: Expense[];
 	};
 
-	let { open = $bindable(), expenses }: Props = $props();
+	let { open = $bindable() }: Props = $props();
+
+	const cardsStore = pendingExpenseCards();
+	const categoriesStore = categoryOptions();
+	const cards = $derived($cardsStore ?? []);
+	const categories = $derived($categoriesStore ?? []);
 
 	let dialogEl: HTMLDialogElement | undefined = $state();
-	let queue = $state<Expense[]>([]);
-
-	$effect(() => {
-		if (open) {
-			queue = [...expenses];
-		}
-	});
 
 	$effect(() => {
 		if (!dialogEl) return;
@@ -33,28 +23,15 @@
 		}
 	});
 
-	const currencyFmt = new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD'
-	});
-	const dateFmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
+	// `cards` is the live list of pending items; reviewing one drops it from the
+	// list, so the next pending item becomes `current` automatically.
+	const current = $derived(cards[0]);
 
-	const current = $derived(queue[0]);
-	const formattedValue = $derived(current ? currencyFmt.format(current.value) : '');
-	const formattedDate = $derived(current ? dateFmt.format(new Date(current.date)) : '');
-
-	const categories = [
-		{ name: 'Fixed', classes: 'bg-accent text-white' },
-		{ name: 'Comfort', classes: 'bg-primary text-white' },
-		{ name: 'Indulgences', classes: 'bg-highlight text-ink' },
-		{ name: 'Self Improvement', classes: 'bg-alert text-white' }
-	] as const;
-
-	function selectCategory(name: string) {
+	async function selectCategory(categoryId: number) {
 		if (!current) return;
-		console.log('category selected:', name, 'for', current.title);
-		queue = queue.slice(1);
-		if (queue.length === 0) {
+		const wasLast = cards.length === 1;
+		await reviewExpense(current.id, categoryId);
+		if (wasLast) {
 			open = false;
 		}
 	}
@@ -78,13 +55,13 @@
 >
 	{#if current}
 		<div class="relative">
-			{#if queue.length > 2}
+			{#if cards.length > 2}
 				<div
 					aria-hidden="true"
 					class="absolute inset-x-6 -bottom-3 h-6 rounded-2xl border border-ink/10 bg-white shadow-sm"
 				></div>
 			{/if}
-			{#if queue.length > 1}
+			{#if cards.length > 1}
 				<div
 					aria-hidden="true"
 					class="absolute inset-x-3 -bottom-2 h-6 rounded-2xl border border-ink/10 bg-white shadow-sm"
@@ -95,32 +72,24 @@
 				<div class="flex items-start justify-between gap-3">
 					<h2 class="text-lg font-semibold text-primary-deep">{current.title}</h2>
 					<div class="flex items-center gap-2">
-						<span class="text-xs text-ink/50">{queue.length} left</span>
-						<button
-							type="button"
-							aria-label="Close"
-							onclick={() => (open = false)}
-							class="-mt-1 -mr-1 flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-ink/60 hover:text-ink"
-						>
-							×
-						</button>
+						<span class="text-xs text-ink/50">{cards.length} left</span>
 					</div>
 				</div>
 
 				<div class="flex flex-col items-center gap-1">
-					<span class="text-4xl font-semibold text-primary-deep">{formattedValue}</span>
+					<span class="text-4xl font-semibold text-primary-deep">{current.amountLabel}</span>
 					<span class="text-sm text-ink/60"
-						>{formattedDate} · {current.bank} · {current.transactionType}</span
+						>{current.dateLabel} · {current.accountName} · {current.method}</span
 					>
 				</div>
 
 				<p class="text-center text-sm text-ink/80">{current.description}</p>
 
 				<div class="grid grid-cols-2 gap-3 pt-2">
-					{#each categories as cat (cat.name)}
+					{#each categories as cat (cat.id)}
 						<button
 							type="button"
-							onclick={() => selectCategory(cat.name)}
+							onclick={() => selectCategory(cat.id)}
 							class="rounded-xl px-3 py-3 text-sm font-medium shadow-sm transition-transform duration-150 hover:scale-[1.02] active:scale-95 {cat.classes}"
 						>
 							{cat.name}

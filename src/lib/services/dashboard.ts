@@ -1,0 +1,92 @@
+import { liveQuery } from 'dexie';
+import { db } from '$lib/db';
+import { wholeMoney } from './format';
+import type { BudgetView, Period, PeriodBudget, PeriodOption } from './types';
+
+const PERIODS: Period[] = ['Year', 'Month', 'Week'];
+
+export const periodOptions: PeriodOption[] = PERIODS.map((p) => ({ name: p, label: p }));
+
+// Parse an ISO 'YYYY-MM-DD' string as a local date (avoids the UTC-midnight shift).
+function parseLocalDate(iso: string): Date {
+	const [year, month, day] = iso.split('-').map(Number);
+	return new Date(year, month - 1, day);
+}
+
+// Inclusive [start, end] window a period covers, relative to today.
+function periodWindow(period: Period): { start: Date; end: Date } {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = now.getMonth();
+	const date = now.getDate();
+	if (period === 'Year') {
+		return { start: new Date(year, 0, 1), end: new Date(year, 11, 31, 23, 59, 59, 999) };
+	}
+	if (period === 'Month') {
+		return { start: new Date(year, month, 1), end: new Date(year, month + 1, 0, 23, 59, 59, 999) };
+	}
+	// Week: Sunday-Saturday of the current week.
+	const sunday = date - now.getDay();
+	return {
+		start: new Date(year, month, sunday),
+		end: new Date(year, month, sunday + 6, 23, 59, 59, 999)
+	};
+}
+
+function inWindow(iso: string, window: { start: Date; end: Date }): boolean {
+	const d = parseLocalDate(iso);
+	return d >= window.start && d <= window.end;
+}
+
+function toBar(primaryLabel: string, accumulated: number, limit: number): BudgetView {
+	return {
+		primaryLabel,
+		secondaryLabel: `${wholeMoney(accumulated)} / ${wholeMoney(limit)}`,
+		percentage: limit > 0 ? Math.round((accumulated / limit) * 100) : 0
+	};
+}
+
+// Reactive, income-derived budgets per period. The total limit comes from the
+// year's income (Year = total, Month = /12, Week = /52); accumulated is the sum
+// of reviewed outflows in the period window; each category takes a fixed
+// percentage of the total limit.
+export function budgetBars() {
+	return liveQuery(async () => {
+		const [categories, transactions] = await Promise.all([
+			db.categories.toArray(),
+			db.transactions.toArray()
+		]);
+
+		const yearWindow = periodWindow('Year');
+		const yearlyIncome = transactions
+			.filter((t) => t.direction === 'in' && inWindow(t.date, yearWindow))
+			.reduce((sum, t) => sum + t.amount, 0);
+
+		const totalLimit: Record<Period, number> = {
+			Year: yearlyIncome,
+			Month: yearlyIncome / 12,
+			Week: yearlyIncome / 52
+		};
+
+		const result: Record<string, PeriodBudget> = {};
+		for (const period of PERIODS) {
+			const window = periodWindow(period);
+			const outflows = transactions.filter(
+				(t) => t.direction === 'out' && t.status === 'reviewed' && inWindow(t.date, window)
+			);
+			const accumulated = outflows.reduce((sum, t) => sum + t.amount, 0);
+
+			result[period] = {
+				total: toBar('Total', accumulated, totalLimit[period]),
+				categories: categories.map((c) => {
+					const catLimit = (totalLimit[period] * c.budgetPercentage) / 100;
+					const catAccum = outflows
+						.filter((t) => t.categoryId === c.id)
+						.reduce((sum, t) => sum + t.amount, 0);
+					return toBar(c.name, catAccum, catLimit);
+				})
+			};
+		}
+		return result;
+	});
+}

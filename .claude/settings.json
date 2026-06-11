@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm:*)"
+    ],
+    "deny": [
+      "Bash(rm:*/..*)",
+      "Bash(rm:*~*)",
+      "Bash(rm:/*)",
+      "Bash(rm:*$HOME*)",
+      "Bash(rm:*${HOME}*)"
+    ]
+  }
+}

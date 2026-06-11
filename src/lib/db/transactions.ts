@@ -1,4 +1,3 @@
-import { liveQuery } from 'dexie';
 import { db } from './index';
 import type { Transaction } from './types';
 
@@ -21,9 +20,4 @@ export function reviewTransaction(id: number, categoryId: number) {
 
 export function listPending() {
 	return db.transactions.where('status').equals('pending').toArray();
-}
-
-// Reactive store of pending transactions, for later component wiring.
-export function pendingTransactions() {
-	return liveQuery(() => db.transactions.where('status').equals('pending').toArray());
 }
