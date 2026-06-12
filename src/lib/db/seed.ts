@@ -2,14 +2,15 @@ import type { FinnDB } from './index';
 import type { Account, Category, Transaction } from './types';
 
 // `budgetPercentage` is each category's share of the period budget (sums to 100).
-const categories: Category[] = [
+// Sync fields (updatedAt/deleted) are stamped at insert time in seed().
+const categories: Omit<Category, 'id' | 'updatedAt' | 'deleted'>[] = [
 	{ name: 'Fixed', classes: 'bg-accent text-white', budgetPercentage: 50 },
 	{ name: 'Comfort', classes: 'bg-primary text-white', budgetPercentage: 25 },
 	{ name: 'Indulgences', classes: 'bg-highlight text-ink', budgetPercentage: 15 },
 	{ name: 'Self Improvement', classes: 'bg-alert text-white', budgetPercentage: 10 }
 ];
 
-const accounts: Account[] = [
+const accounts: Omit<Account, 'id' | 'updatedAt' | 'deleted'>[] = [
 	{ name: 'NuBank', type: 'bank' },
 	{ name: 'BTG Pactual', type: 'bank' },
 	{ name: 'CAIXA', type: 'bank' }
@@ -119,13 +120,19 @@ const pendingOutflows = [
  * executes inside the upgrade transaction.
  */
 export async function seed(db: FinnDB): Promise<void> {
-	const categoryIds = await db.categories.bulkAdd(categories, { allKeys: true });
-	const accountIds = await db.accounts.bulkAdd(accounts, { allKeys: true });
+	const now = Date.now();
+
+	const categoryIds = await db.categories.bulkAdd(
+		categories.map((c) => ({ ...c, updatedAt: now, deleted: 0 as const })),
+		{ allKeys: true }
+	);
+	const accountIds = await db.accounts.bulkAdd(
+		accounts.map((a) => ({ ...a, updatedAt: now, deleted: 0 as const })),
+		{ allKeys: true }
+	);
 
 	const categoryIdByName = new Map(categories.map((c, i) => [c.name, categoryIds[i]]));
 	const accountIdByName = new Map(accounts.map((a, i) => [a.name, accountIds[i]]));
-
-	const now = Date.now();
 
 	const income: Transaction[] = incomeDeposits.map((d) => ({
 		direction: 'in',
@@ -138,7 +145,9 @@ export async function seed(db: FinnDB): Promise<void> {
 		categoryId: null,
 		method: 'Deposit',
 		status: 'reviewed',
-		createdAt: now
+		createdAt: now,
+		updatedAt: now,
+		deleted: 0
 	}));
 
 	const reviewed: Transaction[] = reviewedExpenses.map((e) => ({
@@ -152,7 +161,9 @@ export async function seed(db: FinnDB): Promise<void> {
 		categoryId: categoryIdByName.get(e.category)!,
 		method: e.method,
 		status: 'reviewed',
-		createdAt: now
+		createdAt: now,
+		updatedAt: now,
+		deleted: 0
 	}));
 
 	const pending: Transaction[] = pendingOutflows.map((tx) => ({
@@ -166,7 +177,9 @@ export async function seed(db: FinnDB): Promise<void> {
 		categoryId: null,
 		method: tx.method,
 		status: 'pending',
-		createdAt: now
+		createdAt: now,
+		updatedAt: now,
+		deleted: 0
 	}));
 
 	await db.transactions.bulkAdd([...income, ...reviewed, ...pending]);

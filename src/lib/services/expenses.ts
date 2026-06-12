@@ -21,26 +21,24 @@ export function pendingExpenseCards() {
 		return pending
 			.filter((t) => t.direction === 'out' && !t.hidden)
 			.map(
-			(t): ExpenseCard => ({
-				id: t.id!,
-				title: t.title,
-				description: t.description,
-				amountLabel: money(t.amount),
-				dateLabel: formatDate(t.date),
-				accountName: accountName[t.accountId] ?? '',
-				method: t.method
-			})
-		);
+				(t): ExpenseCard => ({
+					id: t.id!,
+					title: t.title,
+					description: t.description,
+					amountLabel: money(t.amount),
+					dateLabel: formatDate(t.date),
+					accountName: accountName[t.accountId] ?? '',
+					method: t.method
+				})
+			);
 	});
 }
 
 // Reactive list of categories the user can assign during review.
 export function categoryOptions() {
 	return liveQuery(async () => {
-		const categories = await db.categories.toArray();
-		return categories.map(
-			(c): CategoryOption => ({ id: c.id!, name: c.name, classes: c.classes })
-		);
+		const categories = await db.categories.filter((c) => c.deleted !== 1).toArray();
+		return categories.map((c): CategoryOption => ({ id: c.id!, name: c.name, classes: c.classes }));
 	});
 }
 

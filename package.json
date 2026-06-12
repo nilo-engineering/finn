@@ -8,6 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
+		"db:migrate": "node --env-file=.env --experimental-strip-types scripts/migrate.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
@@ -22,6 +23,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tailwindcss/vite": "^4.2.2",
 		"@types/node": "^24",
+		"@types/pg": "^8.20.0",
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.17.0",
@@ -38,6 +40,7 @@
 	},
 	"dependencies": {
 		"dexie": "^4.4.3",
-		"iconoir": "^7.11.0"
+		"iconoir": "^7.11.0",
+		"pg": "^8.21.0"
 	}
 }

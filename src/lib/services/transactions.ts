@@ -18,7 +18,7 @@ import type { TransactionView } from './types';
 export function transactionList() {
 	return liveQuery(async () => {
 		const [txs, accounts, categories] = await Promise.all([
-			db.transactions.toArray(),
+			db.transactions.filter((t) => t.deleted !== 1).toArray(),
 			db.accounts.toArray(),
 			db.categories.toArray()
 		]);

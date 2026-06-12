@@ -1,20 +1,32 @@
 import { db } from './index';
 import type { Category } from './types';
+import { requestSync } from '$lib/sync';
 
-export function addCategory(cat: Omit<Category, 'id'>) {
-	return db.categories.add(cat);
+export function addCategory(cat: Omit<Category, 'id' | 'updatedAt' | 'deleted'>) {
+	return db.categories.add({ ...cat, updatedAt: Date.now(), deleted: 0 }).then((id) => {
+		requestSync();
+		return id;
+	});
 }
 
 export function updateCategory(id: number, changes: Partial<Category>) {
-	return db.categories.update(id, changes);
+	return db.categories.update(id, { ...changes, updatedAt: Date.now() }).then((updated) => {
+		requestSync();
+		return updated;
+	});
 }
 
+// Soft delete: keep the row as a tombstone so the deletion syncs to the server.
 export function deleteCategory(id: number) {
-	return db.categories.delete(id);
+	return updateCategory(id, { deleted: 1 });
 }
 
-// Number of transactions referencing this category; a non-zero count blocks
+// Number of live transactions referencing this category; a non-zero count blocks
 // deletion so we never orphan transactions.
 export function countCategoryTransactions(id: number) {
-	return db.transactions.where('categoryId').equals(id).count();
+	return db.transactions
+		.where('categoryId')
+		.equals(id)
+		.and((t) => t.deleted !== 1)
+		.count();
 }

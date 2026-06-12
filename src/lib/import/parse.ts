@@ -3,7 +3,9 @@ import type { ImportProfile } from './types';
 import { profiles } from './profiles';
 import type { CsvRecord } from './csv';
 
-export type NewTransaction = Omit<Transaction, 'id' | 'createdAt'>;
+// Sync bookkeeping (createdAt/updatedAt/deleted) is stamped by the db wrappers,
+// so callers building transactions never supply it.
+export type NewTransaction = Omit<Transaction, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>;
 
 export interface RowError {
 	row: number; // 1-based line number within the file

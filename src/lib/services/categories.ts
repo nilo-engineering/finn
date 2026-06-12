@@ -12,7 +12,7 @@ import type { CategoryView } from './types';
 // of transactions referencing it (so the UI can guard deletion).
 export function categoryList() {
 	return liveQuery(async () => {
-		const categories = await db.categories.toArray();
+		const categories = await db.categories.filter((c) => c.deleted !== 1).toArray();
 		const views = await Promise.all(
 			categories.map(
 				async (c): Promise<CategoryView> => ({

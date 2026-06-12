@@ -53,8 +53,8 @@ function toBar(primaryLabel: string, accumulated: number, limit: number): Budget
 export function budgetBars() {
 	return liveQuery(async () => {
 		const [categories, transactions] = await Promise.all([
-			db.categories.toArray(),
-			db.transactions.toArray()
+			db.categories.filter((c) => c.deleted !== 1).toArray(),
+			db.transactions.filter((t) => t.deleted !== 1).toArray()
 		]);
 
 		const yearWindow = periodWindow('Year');

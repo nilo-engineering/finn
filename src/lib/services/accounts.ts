@@ -12,7 +12,7 @@ import type { AccountView } from './types';
 // transactions referencing it (so the UI can guard deletion).
 export function accountList() {
 	return liveQuery(async () => {
-		const accounts = await db.accounts.toArray();
+		const accounts = await db.accounts.filter((a) => a.deleted !== 1).toArray();
 		const views = await Promise.all(
 			accounts.map(
 				async (a): Promise<AccountView> => ({
