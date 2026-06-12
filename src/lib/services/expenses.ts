@@ -19,7 +19,7 @@ export function pendingExpenseCards() {
 
 		// Only outflows are reviewed in this flow; income is never "pending".
 		return pending
-			.filter((t) => t.direction === 'out')
+			.filter((t) => t.direction === 'out' && !t.hidden)
 			.map(
 			(t): ExpenseCard => ({
 				id: t.id!,

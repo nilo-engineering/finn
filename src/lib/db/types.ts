@@ -26,6 +26,7 @@ export interface Transaction {
 	categoryId: number | null; // FK -> Category.id; null until reviewed
 	method: string; // 'Credit' | 'Debit'
 	status: TxStatus; // 'pending' until categorized, then 'reviewed'
+	hidden?: boolean; // excluded from dashboard aggregations; absent = visible
 	createdAt: number; // Date.now() at insert
 	sourceRow?: string; // original raw CSV line; only set on import
 }

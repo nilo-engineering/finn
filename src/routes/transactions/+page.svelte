@@ -2,7 +2,9 @@
 	import { resolve } from '$app/paths';
 	import Icon from '$lib/components/Icon.svelte';
 	import navArrowLeft from 'iconoir/icons/nav-arrow-left.svg?raw';
-	import { transactionList, renameTransaction } from '$lib/services/transactions';
+	import eyeClosed from 'iconoir/icons/eye-closed.svg?raw';
+	import eye from 'iconoir/icons/eye.svg?raw';
+	import { transactionList, renameTransaction, setTransactionHidden } from '$lib/services/transactions';
 	import { debounce } from '$lib/utils/debounce';
 
 	const txStore = transactionList();
@@ -58,7 +60,11 @@
 					{#if i === 0 || tx.monthLabel !== transactions[i - 1].monthLabel}
 						<li class="px-1 pt-4 pb-1 text-sm font-semibold text-ink/40 first:pt-0">{tx.monthLabel}</li>
 					{/if}
-					<li class="flex items-center justify-between gap-3 rounded-xl border border-ink/10 bg-white px-4 py-3 shadow-sm">
+					<li
+						class="flex items-center justify-between gap-3 rounded-xl border border-ink/10 bg-white px-4 py-3 shadow-sm transition-opacity {tx.hidden
+							? 'opacity-50'
+							: ''}"
+					>
 						<div class="min-w-0">
 							{#if editingId === tx.id}
 								<input
@@ -81,11 +87,21 @@
 							{/if}
 							<p class="truncate text-sm text-ink/50">{tx.accountName} · {tx.categoryName}</p>
 						</div>
-						<div class="shrink-0 text-right">
-							<p class="text-sm text-ink/50">{tx.dateLabel}</p>
-							<p class="font-medium {tx.direction === 'in' ? 'text-accent' : 'text-alert'}">
-								{tx.direction === 'in' ? '+' : '−'}{tx.amountLabel}
-							</p>
+						<div class="flex shrink-0 items-center gap-2">
+							<div class="text-right">
+								<p class="text-sm text-ink/50">{tx.dateLabel}</p>
+								<p class="font-medium {tx.direction === 'in' ? 'text-accent' : 'text-alert'}">
+									{tx.direction === 'in' ? '+' : '−'}{tx.amountLabel}
+								</p>
+							</div>
+							<button
+								type="button"
+								onclick={() => setTransactionHidden(tx.id, !tx.hidden)}
+								aria-label={tx.hidden ? 'Show transaction' : 'Hide transaction'}
+								class="flex h-8 w-8 items-center justify-center rounded-full text-ink/40 transition-colors hover:bg-ink/5 hover:text-ink"
+							>
+								<Icon src={tx.hidden ? eye : eyeClosed} class="h-4 w-4" />
+							</button>
 						</div>
 					</li>
 				{/each}

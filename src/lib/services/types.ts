@@ -40,6 +40,7 @@ export type TransactionView = {
 	direction: Direction; // drives amount color and sign
 	accountName: string; // "NuBank"
 	categoryName: string; // "Comfort" or "Uncategorized"
+	hidden: boolean; // dims the row; excluded from dashboard
 };
 
 export type CategoryOption = {

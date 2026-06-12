@@ -1,7 +1,7 @@
 import { liveQuery } from 'dexie';
 import { db } from '$lib/db';
 import type { Account } from '$lib/db/types';
-import { bulkAddTransactions, updateTransaction } from '$lib/db/transactions';
+import { bulkAddTransactions, setTransactionHidden, updateTransaction } from '$lib/db/transactions';
 import { parseCsv } from '$lib/import/csv';
 import {
 	detectProfile,
@@ -45,7 +45,8 @@ export function transactionList() {
 				amountLabel: money(t.amount),
 				direction: t.direction,
 				accountName: accountName[t.accountId] ?? '',
-				categoryName: t.categoryId !== null ? (categoryName[t.categoryId] ?? '') : 'Uncategorized'
+				categoryName: t.categoryId !== null ? (categoryName[t.categoryId] ?? '') : 'Uncategorized',
+				hidden: t.hidden ?? false
 			})
 		);
 	});
@@ -54,6 +55,8 @@ export function transactionList() {
 export function renameTransaction(id: number, title: string) {
 	return updateTransaction(id, { title });
 }
+
+export { setTransactionHidden };
 
 export interface ImportPreview {
 	profile: ImportProfile | null; // null when auto-detect found no match

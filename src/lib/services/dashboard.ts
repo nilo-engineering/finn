@@ -59,7 +59,7 @@ export function budgetBars() {
 
 		const yearWindow = periodWindow('Year');
 		const yearlyIncome = transactions
-			.filter((t) => t.direction === 'in' && inWindow(t.date, yearWindow))
+			.filter((t) => t.direction === 'in' && !t.hidden && inWindow(t.date, yearWindow))
 			.reduce((sum, t) => sum + t.amount, 0);
 
 		const totalLimit: Record<Period, number> = {
@@ -72,7 +72,8 @@ export function budgetBars() {
 		for (const period of PERIODS) {
 			const window = periodWindow(period);
 			const outflows = transactions.filter(
-				(t) => t.direction === 'out' && t.status === 'reviewed' && inWindow(t.date, window)
+				(t) =>
+					t.direction === 'out' && t.status === 'reviewed' && !t.hidden && inWindow(t.date, window)
 			);
 			const accumulated = outflows.reduce((sum, t) => sum + t.amount, 0);
 

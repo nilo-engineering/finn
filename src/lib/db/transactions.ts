@@ -14,6 +14,10 @@ export function updateTransaction(id: number, changes: Partial<Transaction>) {
 	return db.transactions.update(id, changes);
 }
 
+export function setTransactionHidden(id: number, hidden: boolean) {
+	return updateTransaction(id, { hidden });
+}
+
 export function deleteTransaction(id: number) {
 	return db.transactions.delete(id);
 }
