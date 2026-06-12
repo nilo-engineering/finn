@@ -23,6 +23,11 @@ export function reviewTransaction(id: number, categoryId: number) {
 	return db.transactions.update(id, { categoryId, status: 'reviewed' });
 }
 
+// Reverse reviewTransaction: send the transaction back to the pending review queue.
+export function unreviewTransaction(id: number) {
+	return db.transactions.update(id, { categoryId: null, status: 'pending' });
+}
+
 export function listPending() {
 	return db.transactions.where('status').equals('pending').toArray();
 }

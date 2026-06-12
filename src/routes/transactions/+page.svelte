@@ -2,10 +2,43 @@
 	import { resolve } from '$app/paths';
 	import Icon from '$lib/components/Icon.svelte';
 	import navArrowLeft from 'iconoir/icons/nav-arrow-left.svg?raw';
-	import { transactionList } from '$lib/services/transactions';
+	import { transactionList, renameTransaction } from '$lib/services/transactions';
+	import { debounce } from '$lib/utils/debounce';
 
 	const txStore = transactionList();
 	const transactions = $derived($txStore ?? []);
+
+	let editingId: number | null = $state(null);
+	let titleDraft = $state('');
+	let titleInputEl: HTMLInputElement | undefined = $state();
+
+	const saveTitle = debounce((id: number, title: string) => renameTransaction(id, title), 400);
+
+	$effect(() => {
+		if (editingId !== null) titleInputEl?.focus();
+	});
+
+	function startEditing(id: number, title: string) {
+		titleDraft = title;
+		editingId = id;
+	}
+
+	function onTitleInput() {
+		if (editingId === null) return;
+		saveTitle(editingId, titleDraft.trim());
+	}
+
+	function commitTitle() {
+		saveTitle.flush();
+		editingId = null;
+	}
+
+	function onTitleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === 'Escape') {
+			e.preventDefault();
+			titleInputEl?.blur();
+		}
+	}
 </script>
 
 <div class="mx-auto flex min-h-screen w-full max-w-125 flex-col bg-background text-ink">
@@ -27,7 +60,25 @@
 					{/if}
 					<li class="flex items-center justify-between gap-3 rounded-xl border border-ink/10 bg-white px-4 py-3 shadow-sm">
 						<div class="min-w-0">
-							<p class="truncate text-base font-medium">{tx.title}</p>
+							{#if editingId === tx.id}
+								<input
+									bind:this={titleInputEl}
+									bind:value={titleDraft}
+									type="text"
+									oninput={onTitleInput}
+									onfocusout={commitTitle}
+									onkeydown={onTitleKeydown}
+									class="w-full rounded-lg border border-ink/15 px-2 py-0.5 text-base font-medium outline-none focus:border-primary"
+								/>
+							{:else}
+								<button
+									type="button"
+									onclick={() => startEditing(tx.id, tx.title)}
+									class="-mx-2 -my-0.5 block w-[calc(100%+1rem)] truncate rounded-lg px-2 py-0.5 text-left text-base font-medium transition-colors hover:bg-ink/5"
+								>
+									{tx.title}
+								</button>
+							{/if}
 							<p class="truncate text-sm text-ink/50">{tx.accountName} · {tx.categoryName}</p>
 						</div>
 						<div class="shrink-0 text-right">

@@ -1,7 +1,7 @@
 import { liveQuery } from 'dexie';
 import { db } from '$lib/db';
 import type { Account } from '$lib/db/types';
-import { bulkAddTransactions } from '$lib/db/transactions';
+import { bulkAddTransactions, updateTransaction } from '$lib/db/transactions';
 import { parseCsv } from '$lib/import/csv';
 import {
 	detectProfile,
@@ -49,6 +49,10 @@ export function transactionList() {
 			})
 		);
 	});
+}
+
+export function renameTransaction(id: number, title: string) {
+	return updateTransaction(id, { title });
 }
 
 export interface ImportPreview {

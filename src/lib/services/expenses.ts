@@ -1,6 +1,11 @@
 import { liveQuery } from 'dexie';
 import { db } from '$lib/db';
-import { listPending, reviewTransaction } from '$lib/db/transactions';
+import {
+	listPending,
+	reviewTransaction,
+	unreviewTransaction,
+	updateTransaction
+} from '$lib/db/transactions';
 import { formatDate, money } from './format';
 import type { CategoryOption, ExpenseCard } from './types';
 
@@ -41,4 +46,12 @@ export function categoryOptions() {
 
 export function reviewExpense(id: number, categoryId: number) {
 	return reviewTransaction(id, categoryId);
+}
+
+export function unreviewExpense(id: number) {
+	return unreviewTransaction(id);
+}
+
+export function renameExpense(id: number, title: string) {
+	return updateTransaction(id, { title });
 }
