@@ -9,12 +9,19 @@
 	import label from 'iconoir/icons/label.svg?raw';
 	import bank from 'iconoir/icons/bank.svg?raw';
 	import importIcon from 'iconoir/icons/import.svg?raw';
+	import logOut from 'iconoir/icons/log-out.svg?raw';
 	import { budgetBars, periodOptions } from '$lib/services/dashboard';
 
 	let selected = $state('Year');
 	let modalOpen = $state(false);
 	const bars = budgetBars();
 	const view = $derived($bars?.[selected]);
+
+	async function logout() {
+		await fetch('/logout', { method: 'POST' });
+		// Hard navigation so hooks re-run and any in-memory state is cleared.
+		window.location.href = '/login';
+	}
 </script>
 
 <div class="mx-auto flex min-h-screen w-full max-w-125 flex-col bg-background text-ink">
@@ -34,6 +41,9 @@
 				<a href={resolve('/accounts')} aria-label="Manage accounts" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
 					<Icon src={bank} class="h-5 w-5" />
 				</a>
+				<button type="button" onclick={logout} aria-label="Sign out" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
+					<Icon src={logOut} class="h-5 w-5" />
+				</button>
 			</div>
 		</div>
 

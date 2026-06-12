@@ -1,4 +1,5 @@
 import type { EntityTable } from 'dexie';
+import { browser } from '$app/environment';
 import { db } from '$lib/db';
 import type { Account, Category, Transaction } from '$lib/db/types';
 
@@ -6,6 +7,16 @@ interface Changes {
 	accounts: Account[];
 	categories: Category[];
 	transactions: Transaction[];
+}
+
+// A 401 means the session expired; bounce to login. Otherwise surface the error
+// so sync() logs it and retries on the next trigger.
+function assertOk(res: Response, label: string): void {
+	if (res.status === 401) {
+		if (browser) window.location.href = '/login';
+		throw new Error('sync unauthorized');
+	}
+	if (!res.ok) throw new Error(`sync ${label} failed: ${res.status}`);
 }
 
 async function getCursor(key: string): Promise<number> {
@@ -31,7 +42,7 @@ async function push(): Promise<void> {
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({ changes: { accounts, categories, transactions } })
 	});
-	if (!res.ok) throw new Error(`sync push failed: ${res.status}`);
+	assertOk(res, 'push');
 	const { serverTime } = (await res.json()) as { serverTime: number };
 	await setCursor('lastPushedAt', serverTime);
 }
@@ -40,7 +51,7 @@ async function push(): Promise<void> {
 async function pull(): Promise<void> {
 	const since = await getCursor('lastPulledAt');
 	const res = await fetch(`/api/sync?since=${since}`);
-	if (!res.ok) throw new Error(`sync pull failed: ${res.status}`);
+	assertOk(res, 'pull');
 	const { serverTime, changes } = (await res.json()) as { serverTime: number; changes: Changes };
 
 	await db.transaction('rw', db.accounts, db.categories, db.transactions, db.syncMeta, async () => {

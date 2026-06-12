@@ -37,7 +37,8 @@ function q(identifier: string): string {
 }
 
 // Pull: every row changed since the client's cursor, tombstones included.
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, locals }) => {
+	if (!locals.authenticated) return new Response('Unauthorized', { status: 401 });
 	const since = Number(url.searchParams.get('since') ?? 0);
 	const serverTime = Date.now();
 	const changes: Record<Table, Record<string, unknown>[]> = {
@@ -54,7 +55,8 @@ export const GET: RequestHandler = async ({ url }) => {
 
 // Push: upsert the client's local delta with last-write-wins by updatedAt,
 // inside a single transaction.
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	if (!locals.authenticated) return new Response('Unauthorized', { status: 401 });
 	const body = (await request.json()) as { changes?: Partial<Record<Table, unknown[]>> };
 	const client = await pool.connect();
 	try {

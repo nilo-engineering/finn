@@ -7,9 +7,11 @@
 	import { startSync } from '$lib/sync';
 	import './layout.css';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
-	onMount(startSync);
+	onMount(() => {
+		if (data.authenticated) startSync();
+	});
 </script>
 
 <svelte:head><title>Finn</title></svelte:head>
