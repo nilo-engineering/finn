@@ -85,7 +85,12 @@
 									{tx.title}
 								</button>
 							{/if}
-							<p class="truncate text-sm text-ink/50">{tx.accountName} · {tx.categoryName}</p>
+							<p class="truncate text-sm text-ink/50">
+								{tx.accountName} · {tx.categoryName} · {tx.method}
+							</p>
+							{#if tx.description}
+								<p class="truncate text-xs text-ink/40">{tx.description}</p>
+							{/if}
 						</div>
 						<div class="flex shrink-0 items-center gap-2">
 							<div class="text-right">

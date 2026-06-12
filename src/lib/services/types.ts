@@ -34,12 +34,14 @@ export type ExpenseCard = {
 export type TransactionView = {
 	id: number;
 	title: string;
+	description: string;
 	monthLabel: string; // "June 2026" — used to group rows under month headers
 	dateLabel: string; // "Jun 6, 2026"
 	amountLabel: string; // "$6.50"
 	direction: Direction; // drives amount color and sign
 	accountName: string; // "NuBank"
 	categoryName: string; // "Comfort" or "Uncategorized"
+	method: string; // "Credit" or "Debit"
 	hidden: boolean; // dims the row; excluded from dashboard
 };
 

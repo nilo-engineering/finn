@@ -40,12 +40,14 @@ export function transactionList() {
 			(t): TransactionView => ({
 				id: t.id!,
 				title: t.title,
+				description: t.description,
 				monthLabel: formatMonth(t.date),
 				dateLabel: formatDate(t.date),
 				amountLabel: money(t.amount),
 				direction: t.direction,
 				accountName: accountName[t.accountId] ?? '',
 				categoryName: t.categoryId !== null ? (categoryName[t.categoryId] ?? '') : 'Uncategorized',
+				method: t.method,
 				hidden: t.hidden ?? false
 			})
 		);
