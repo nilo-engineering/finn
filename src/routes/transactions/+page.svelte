@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import Icon from '$lib/components/Icon.svelte';
+	import FilterPill from '$lib/components/FilterPill.svelte';
 	import navArrowLeft from 'iconoir/icons/nav-arrow-left.svg?raw';
 	import eyeClosed from 'iconoir/icons/eye-closed.svg?raw';
 	import eye from 'iconoir/icons/eye.svg?raw';
@@ -9,6 +10,55 @@
 
 	const txStore = transactionList();
 	const transactions = $derived($txStore ?? []);
+
+	let search = $state('');
+	let direction = $state(''); // '' | 'in' | 'out'
+	let method = $state(''); // '' | 'Credit' | 'Debit' | ...
+	let account = $state(''); // '' | accountName
+	let month = $state(''); // '' | monthLabel
+
+	const directionOptions = [
+		{ value: 'in', label: 'Money in' },
+		{ value: 'out', label: 'Money out' }
+	];
+	// Distinct values come from the full list so options stay available regardless of active filters.
+	const methodOptions = $derived(distinct(transactions.map((t) => t.method)));
+	const accountOptions = $derived(distinct(transactions.map((t) => t.accountName)));
+	const monthOptions = $derived(distinct(transactions.map((t) => t.monthLabel)));
+
+	function distinct(values: string[]): { value: string; label: string }[] {
+		return [...new Set(values.filter(Boolean))].map((v) => ({ value: v, label: v }));
+	}
+
+	const anyActive = $derived(
+		search.trim() !== '' || direction !== '' || method !== '' || account !== '' || month !== ''
+	);
+
+	const filtered = $derived.by(() => {
+		const q = search.trim().toLowerCase();
+		return transactions.filter((t) => {
+			if (direction && t.direction !== direction) return false;
+			if (method && t.method !== method) return false;
+			if (account && t.accountName !== account) return false;
+			if (month && t.monthLabel !== month) return false;
+			if (
+				q &&
+				!t.title.toLowerCase().includes(q) &&
+				!t.description.toLowerCase().includes(q) &&
+				!t.amountLabel.toLowerCase().includes(q)
+			)
+				return false;
+			return true;
+		});
+	});
+
+	function clearFilters() {
+		search = '';
+		direction = '';
+		method = '';
+		account = '';
+		month = '';
+	}
 
 	let editingId: number | null = $state(null);
 	let titleDraft = $state('');
@@ -52,12 +102,40 @@
 			<h1 class="text-2xl font-semibold text-primary-deep">Transactions</h1>
 		</div>
 
+		{#if transactions.length > 0}
+			<div class="mb-6 space-y-3">
+				<input
+					bind:value={search}
+					type="text"
+					placeholder="Search title, description, or value"
+					class="w-full rounded-xl border border-ink/15 px-3 py-2 text-base outline-none focus:border-primary"
+				/>
+				<div class="flex flex-wrap items-center gap-2">
+					<FilterPill label="Direction" bind:value={direction} options={directionOptions} />
+					<FilterPill label="Method" bind:value={method} options={methodOptions} />
+					<FilterPill label="Account" bind:value={account} options={accountOptions} />
+					<FilterPill label="Month" bind:value={month} options={monthOptions} />
+					{#if anyActive}
+						<button
+							type="button"
+							onclick={clearFilters}
+							class="rounded-full px-3 py-1 text-sm text-ink/50 transition-colors hover:bg-ink/5 hover:text-ink"
+						>
+							Clear
+						</button>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
 		{#if transactions.length === 0}
 			<p class="mt-16 text-center text-sm text-ink/50">No transactions yet</p>
+		{:else if filtered.length === 0}
+			<p class="mt-16 text-center text-sm text-ink/50">No transactions match your filters</p>
 		{:else}
 			<ul class="space-y-2">
-				{#each transactions as tx, i (tx.id)}
-					{#if i === 0 || tx.monthLabel !== transactions[i - 1].monthLabel}
+				{#each filtered as tx, i (tx.id)}
+					{#if i === 0 || tx.monthLabel !== filtered[i - 1].monthLabel}
 						<li class="px-1 pt-4 pb-1 text-sm font-semibold text-ink/40 first:pt-0">{tx.monthLabel}</li>
 					{/if}
 					<li
