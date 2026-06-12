@@ -1,3 +1,4 @@
+import { liveQuery } from 'dexie';
 import { db } from '$lib/db';
 import type { Account } from '$lib/db/types';
 import { bulkAddTransactions } from '$lib/db/transactions';
@@ -10,6 +11,45 @@ import {
 } from '$lib/import/parse';
 import { profileById } from '$lib/import/profiles';
 import type { ImportProfile } from '$lib/import/types';
+import { formatDate, formatMonth, money } from './format';
+import type { TransactionView } from './types';
+
+// Reactive list of every transaction, newest first, mapped to render-ready rows.
+export function transactionList() {
+	return liveQuery(async () => {
+		const [txs, accounts, categories] = await Promise.all([
+			db.transactions.toArray(),
+			db.accounts.toArray(),
+			db.categories.toArray()
+		]);
+		const accountName: Record<number, string> = Object.fromEntries(
+			accounts.map((a) => [a.id, a.name])
+		);
+		const categoryName: Record<number, string> = Object.fromEntries(
+			categories.map((c) => [c.id, c.name])
+		);
+
+		// `date` is day-granular, so fall back to `time` then `createdAt` to keep
+		// same-day transactions in a stable newest-first order.
+		txs.sort(
+			(a, b) =>
+				b.date.localeCompare(a.date) || b.time.localeCompare(a.time) || b.createdAt - a.createdAt
+		);
+
+		return txs.map(
+			(t): TransactionView => ({
+				id: t.id!,
+				title: t.title,
+				monthLabel: formatMonth(t.date),
+				dateLabel: formatDate(t.date),
+				amountLabel: money(t.amount),
+				direction: t.direction,
+				accountName: accountName[t.accountId] ?? '',
+				categoryName: t.categoryId !== null ? (categoryName[t.categoryId] ?? '') : 'Uncategorized'
+			})
+		);
+	});
+}
 
 export interface ImportPreview {
 	profile: ImportProfile | null; // null when auto-detect found no match

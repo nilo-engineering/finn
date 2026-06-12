@@ -5,6 +5,7 @@
 	import AlertButton from '$lib/components/AlertButton.svelte';
 	import ExpenseModal from '$lib/components/ExpenseModal.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import list from 'iconoir/icons/list.svg?raw';
 	import label from 'iconoir/icons/label.svg?raw';
 	import bank from 'iconoir/icons/bank.svg?raw';
 	import importIcon from 'iconoir/icons/import.svg?raw';
@@ -21,6 +22,9 @@
 		<div class="mb-8 flex items-center justify-between">
 			<h1 class="text-2xl font-semibold text-primary-deep">Finn</h1>
 			<div class="flex items-center gap-1">
+				<a href={resolve('/transactions')} aria-label="All transactions" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
+					<Icon src={list} class="h-5 w-5" />
+				</a>
 				<a href={resolve('/import')} aria-label="Import transactions" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
 					<Icon src={importIcon} class="h-5 w-5" />
 				</a>

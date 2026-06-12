@@ -1,5 +1,7 @@
 // View models: render-ready shapes consumed directly by pages and components.
 
+import type { Direction } from '$lib/db/types';
+
 export type Period = 'Year' | 'Month' | 'Week';
 
 export type BudgetView = {
@@ -27,6 +29,17 @@ export type ExpenseCard = {
 	dateLabel: string; // "Jun 6, 2026"
 	accountName: string; // "NuBank"
 	method: string; // "Credit"
+};
+
+export type TransactionView = {
+	id: number;
+	title: string;
+	monthLabel: string; // "June 2026" — used to group rows under month headers
+	dateLabel: string; // "Jun 6, 2026"
+	amountLabel: string; // "$6.50"
+	direction: Direction; // drives amount color and sign
+	accountName: string; // "NuBank"
+	categoryName: string; // "Comfort" or "Uncategorized"
 };
 
 export type CategoryOption = {
