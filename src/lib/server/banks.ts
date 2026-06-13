@@ -22,12 +22,14 @@ function mapMovement(account: PluggyAccount, tx: PluggyTransaction) {
 	return { direction, amount: Math.abs(tx.amount), method } as const;
 }
 
-// A descriptive, reasonably-unique account name (the Dexie mirror enforces unique
-// names): institution label plus the masked account number's last digits.
+// A descriptive, unique account name: institution label plus a distinguishing
+// suffix. The Dexie mirror enforces unique names — a collision would make the
+// whole client pull abort — so always append the masked number's last digits, or
+// a slice of the (globally unique) externalId when no number is available.
 function accountName(account: PluggyAccount): string {
 	const base = account.marketingName ?? account.name;
-	const tail = account.number ? account.number.replace(/\D/g, '').slice(-4) : '';
-	return tail ? `${base} ·${tail}` : base;
+	const numberTail = account.number ? account.number.replace(/\D/g, '').slice(-4) : '';
+	return `${base} ·${numberTail || account.id.slice(0, 8)}`;
 }
 
 // Upsert a Pluggy account into our accounts table, matched by externalId. Returns
@@ -100,31 +102,50 @@ async function insertTransaction(
 	return true;
 }
 
-// Fetch every registered item's accounts and transactions and upsert them, all in
-// one transaction. Dedup is by externalId, so re-running is safe. Returns counts.
+type FetchedAccount = { account: PluggyAccount; txs: PluggyTransaction[] };
+
+// Fetch every registered item's accounts and transactions, then upsert them.
+//
+// The slow Pluggy network I/O (Phase 2) is deliberately kept OUT of the DB write
+// transaction (Phase 3): `updatedAt` is stamped right before COMMIT so the window
+// between stamping and commit is milliseconds. Otherwise a concurrent client pull
+// (the 45s loop / tab focus / reconnect) firing mid-sync would advance its
+// `lastPulledAt` cursor past rows still being fetched, hiding them from every
+// future delta pull. Dedup is by externalId, so re-running is safe. Returns counts.
 export async function syncBanks(): Promise<{ accountsAdded: number; transactionsAdded: number }> {
+	const pluggy = getPluggy();
+
+	// Phase 1: which items to sync (quick read).
+	const { rows: items } = await pool.query<{ id: string; last_synced_at: number | null }>(
+		'SELECT id, last_synced_at FROM pluggy_items'
+	);
+
+	// Phase 2: all network I/O, collected into memory — no DB writes here.
+	const fetched: FetchedAccount[] = [];
+	for (const item of items) {
+		const dateFrom = isoDate(item.last_synced_at ?? Date.now() - DEFAULT_LOOKBACK_DAYS * DAY_MS);
+		const accounts = await pluggy.fetchAccounts(item.id);
+		for (const account of accounts.results) {
+			const txs = await pluggy.fetchAllTransactions(account.id, { dateFrom });
+			fetched.push({ account, txs });
+		}
+	}
+
+	// Phase 3: short write transaction with `updatedAt` stamped at ~commit time.
 	const client = await pool.connect();
 	let accountsAdded = 0;
 	let transactionsAdded = 0;
 	try {
 		await client.query('BEGIN');
-		const { rows: items } = await client.query<{ id: string; last_synced_at: number | null }>(
-			'SELECT id, last_synced_at FROM pluggy_items'
-		);
 		const now = Date.now();
-		const pluggy = getPluggy();
-		for (const item of items) {
-			const dateFrom = isoDate(item.last_synced_at ?? now - DEFAULT_LOOKBACK_DAYS * DAY_MS);
-			const accounts = await pluggy.fetchAccounts(item.id);
-			for (const account of accounts.results) {
-				const { id: localAccountId, created } = await upsertAccount(client, account, now);
-				if (created) accountsAdded++;
-				const txs = await pluggy.fetchAllTransactions(account.id, { dateFrom });
-				for (const tx of txs) {
-					if (await insertTransaction(client, tx, account, localAccountId, now))
-						transactionsAdded++;
-				}
+		for (const { account, txs } of fetched) {
+			const { id: localAccountId, created } = await upsertAccount(client, account, now);
+			if (created) accountsAdded++;
+			for (const tx of txs) {
+				if (await insertTransaction(client, tx, account, localAccountId, now)) transactionsAdded++;
 			}
+		}
+		for (const item of items) {
 			await client.query('UPDATE pluggy_items SET last_synced_at = $1 WHERE id = $2', [
 				now,
 				item.id
