@@ -33,14 +33,14 @@ export function createCategory(name: string, classes: string) {
 	return addCategory({ name: name.trim(), classes, budgetPercentage: 0 });
 }
 
-export function renameCategory(id: number, name: string, classes: string) {
+export function renameCategory(id: string, name: string, classes: string) {
 	return updateCategory(id, { name: name.trim(), classes });
 }
 
-export function removeCategory(id: number) {
+export function removeCategory(id: string) {
 	return deleteCategory(id);
 }
 
-export function updateBudgetPercentage(id: number, budgetPercentage: number) {
+export function updateBudgetPercentage(id: string, budgetPercentage: number) {
 	return updateCategory(id, { budgetPercentage });
 }

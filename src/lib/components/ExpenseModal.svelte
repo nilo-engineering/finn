@@ -26,7 +26,7 @@
 
 	// Session-local so skipped expenses stay `pending` in the DB and resurface in the
 	// next review session, rather than being dismissed for good.
-	const skipped = new SvelteSet<number>();
+	const skipped = new SvelteSet<string>();
 
 	$effect(() => {
 		if (!dialogEl) return;
@@ -45,11 +45,11 @@
 	let titleDraft = $state('');
 	let titleInputEl: HTMLInputElement | undefined = $state();
 
-	const saveTitle = debounce((id: number, title: string) => renameExpense(id, title), 400);
+	const saveTitle = debounce((id: string, title: string) => renameExpense(id, title), 400);
 
 	// The liveQuery re-emits a fresh `current` after every save, so reset editing state
 	// only when the underlying card actually changes — not on same-card data updates.
-	let editedId: number | undefined = $state();
+	let editedId: string | undefined = $state();
 	$effect(() => {
 		const id = current?.id;
 		if (id !== editedId) {
@@ -166,7 +166,7 @@
 		}
 	}
 
-	async function selectCategory(categoryId: number) {
+	async function selectCategory(categoryId: string) {
 		if (!current) return;
 		const id = current.id;
 		const wasLast = queue.length === 1;

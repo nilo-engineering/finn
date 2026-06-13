@@ -22,7 +22,7 @@ export type PeriodOption = {
 };
 
 export type ExpenseCard = {
-	id: number;
+	id: string;
 	title: string;
 	description: string;
 	amountLabel: string; // "$6.50"
@@ -32,7 +32,7 @@ export type ExpenseCard = {
 };
 
 export type TransactionView = {
-	id: number;
+	id: string;
 	title: string;
 	description: string;
 	monthLabel: string; // "June 2026" — used to group rows under month headers
@@ -46,19 +46,19 @@ export type TransactionView = {
 };
 
 export type CategoryOption = {
-	id: number;
+	id: string;
 	name: string;
 	classes: string;
 };
 
 export type AccountView = {
-	id: number;
+	id: string;
 	name: string;
 	txCount: number; // transactions referencing this account; >0 blocks delete
 };
 
 export type CategoryView = {
-	id: number;
+	id: string;
 	name: string;
 	classes: string;
 	budgetPercentage: number;

@@ -60,17 +60,17 @@
 		month = '';
 	}
 
-	let editingId: number | null = $state(null);
+	let editingId: string | null = $state(null);
 	let titleDraft = $state('');
 	let titleInputEl: HTMLInputElement | undefined = $state();
 
-	const saveTitle = debounce((id: number, title: string) => renameTransaction(id, title), 400);
+	const saveTitle = debounce((id: string, title: string) => renameTransaction(id, title), 400);
 
 	$effect(() => {
 		if (editingId !== null) titleInputEl?.focus();
 	});
 
-	function startEditing(id: number, title: string) {
+	function startEditing(id: string, title: string) {
 		titleDraft = title;
 		editingId = id;
 	}

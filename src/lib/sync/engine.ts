@@ -63,7 +63,7 @@ async function pull(): Promise<void> {
 }
 
 // Write incoming rows only when they're newer than the local copy (symmetric LWW).
-async function applyTable<T extends { id?: number; updatedAt: number }>(
+async function applyTable<T extends { id?: string; updatedAt: number }>(
 	table: EntityTable<T, 'id'>,
 	rows: T[]
 ): Promise<void> {

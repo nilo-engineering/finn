@@ -30,10 +30,10 @@ export function createAccount(name: string) {
 	return addAccount({ name: name.trim(), type: 'bank' });
 }
 
-export function renameAccount(id: number, name: string) {
+export function renameAccount(id: string, name: string) {
 	return updateAccount(id, { name: name.trim() });
 }
 
-export function removeAccount(id: number) {
+export function removeAccount(id: string) {
 	return deleteAccount(id);
 }

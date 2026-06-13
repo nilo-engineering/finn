@@ -122,19 +122,28 @@ const pendingOutflows = [
 export async function seed(db: FinnDB): Promise<void> {
 	const now = Date.now();
 
-	const categoryIds = await db.categories.bulkAdd(
-		categories.map((c) => ({ ...c, updatedAt: now, deleted: 0 as const })),
-		{ allKeys: true }
-	);
-	const accountIds = await db.accounts.bulkAdd(
-		accounts.map((a) => ({ ...a, updatedAt: now, deleted: 0 as const })),
-		{ allKeys: true }
-	);
+	// Mint UUID ids up front (the stores no longer autoincrement) so the
+	// name -> id maps below can resolve foreign keys before insert.
+	const categoryRows = categories.map((c) => ({
+		...c,
+		id: crypto.randomUUID(),
+		updatedAt: now,
+		deleted: 0 as const
+	}));
+	const accountRows = accounts.map((a) => ({
+		...a,
+		id: crypto.randomUUID(),
+		updatedAt: now,
+		deleted: 0 as const
+	}));
+	await db.categories.bulkAdd(categoryRows);
+	await db.accounts.bulkAdd(accountRows);
 
-	const categoryIdByName = new Map(categories.map((c, i) => [c.name, categoryIds[i]]));
-	const accountIdByName = new Map(accounts.map((a, i) => [a.name, accountIds[i]]));
+	const categoryIdByName = new Map(categoryRows.map((c) => [c.name, c.id]));
+	const accountIdByName = new Map(accountRows.map((a) => [a.name, a.id]));
 
 	const income: Transaction[] = incomeDeposits.map((d) => ({
+		id: crypto.randomUUID(),
 		direction: 'in',
 		amount: d.amount,
 		title: 'Salary',
@@ -151,6 +160,7 @@ export async function seed(db: FinnDB): Promise<void> {
 	}));
 
 	const reviewed: Transaction[] = reviewedExpenses.map((e) => ({
+		id: crypto.randomUUID(),
 		direction: 'out',
 		amount: e.amount,
 		title: e.title,
@@ -167,6 +177,7 @@ export async function seed(db: FinnDB): Promise<void> {
 	}));
 
 	const pending: Transaction[] = pendingOutflows.map((tx) => ({
+		id: crypto.randomUUID(),
 		direction: 'out',
 		amount: tx.amount,
 		title: tx.title,

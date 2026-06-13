@@ -24,11 +24,11 @@
 	}
 
 	// Reflect the drag locally for a live value/total while the slider moves...
-	function setPercentage(id: number, budgetPercentage: number) {
+	function setPercentage(id: string, budgetPercentage: number) {
 		categories = categories.map((r) => (r.id === id ? { ...r, budgetPercentage } : r));
 	}
 
-	function persistPercentage(id: number, budgetPercentage: number) {
+	function persistPercentage(id: string, budgetPercentage: number) {
 		updateBudgetPercentage(id, budgetPercentage);
 	}
 </script>

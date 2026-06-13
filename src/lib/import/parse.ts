@@ -76,7 +76,7 @@ export function parseAmount(
 export function recordsToTransactions(
 	records: CsvRecord[],
 	profile: ImportProfile,
-	accountId: number
+	accountId: string
 ): ParseResult {
 	const header = records[0]?.fields ?? [];
 	const indexOf = (name: string) => {

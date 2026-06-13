@@ -22,10 +22,10 @@ export function transactionList() {
 			db.accounts.toArray(),
 			db.categories.toArray()
 		]);
-		const accountName: Record<number, string> = Object.fromEntries(
+		const accountName: Record<string, string> = Object.fromEntries(
 			accounts.map((a) => [a.id, a.name])
 		);
-		const categoryName: Record<number, string> = Object.fromEntries(
+		const categoryName: Record<string, string> = Object.fromEntries(
 			categories.map((c) => [c.id, c.name])
 		);
 
@@ -54,7 +54,7 @@ export function transactionList() {
 	});
 }
 
-export function renameTransaction(id: number, title: string) {
+export function renameTransaction(id: string, title: string) {
 	return updateTransaction(id, { title });
 }
 

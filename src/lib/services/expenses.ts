@@ -13,7 +13,7 @@ import type { CategoryOption, ExpenseCard } from './types';
 export function pendingExpenseCards() {
 	return liveQuery(async () => {
 		const [pending, accounts] = await Promise.all([listPending(), db.accounts.toArray()]);
-		const accountName: Record<number, string> = Object.fromEntries(
+		const accountName: Record<string, string> = Object.fromEntries(
 			accounts.map((a) => [a.id, a.name])
 		);
 
@@ -42,14 +42,14 @@ export function categoryOptions() {
 	});
 }
 
-export function reviewExpense(id: number, categoryId: number) {
+export function reviewExpense(id: string, categoryId: string) {
 	return reviewTransaction(id, categoryId);
 }
 
-export function unreviewExpense(id: number) {
+export function unreviewExpense(id: string) {
 	return unreviewTransaction(id);
 }
 
-export function renameExpense(id: number, title: string) {
+export function renameExpense(id: string, title: string) {
 	return updateTransaction(id, { title });
 }
