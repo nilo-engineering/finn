@@ -4,7 +4,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import navArrowLeft from 'iconoir/icons/nav-arrow-left.svg?raw';
 	import trash from 'iconoir/icons/trash.svg?raw';
-	import { sync } from '$lib/sync/engine';
+	import { fullSync } from '$lib/sync/engine';
 	import { formatDate } from '$lib/services/format';
 
 	type Item = { id: string; label: string | null; last_synced_at: number | null };
@@ -57,8 +57,9 @@
 				accountsAdded: number;
 				transactionsAdded: number;
 			};
-			// Pull the freshly-ingested server rows into Dexie so they appear in the app.
-			await sync();
+			// Full reconciliation so every server row (accounts + transactions) lands in
+			// Dexie, not just the delta since the last cursor.
+			await fullSync();
 			await loadItems();
 			result = `Added ${transactionsAdded} transaction${transactionsAdded === 1 ? '' : 's'}${accountsAdded > 0 ? ` and ${accountsAdded} account${accountsAdded === 1 ? '' : 's'}` : ''}.`;
 		} else {

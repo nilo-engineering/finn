@@ -93,3 +93,13 @@ export async function sync(): Promise<void> {
 		inFlight = false;
 	}
 }
+
+// Force a full reconciliation: reset the pull cursor so the next pull re-fetches
+// every server row (since=0), not just the delta since the last cursor. Needed
+// after a bank sync — the server ingests rows whose `updatedAt` can sit behind the
+// client's cursor, and transactions are dedup'd by externalId so a delta pull
+// would never re-send them. A full pull is idempotent (applyTable is last-write-wins).
+export async function fullSync(): Promise<void> {
+	await setCursor('lastPulledAt', 0);
+	await sync();
+}
