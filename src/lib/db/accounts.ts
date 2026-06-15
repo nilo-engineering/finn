@@ -23,6 +23,10 @@ export function deleteAccount(id: string) {
 	return updateAccount(id, { deleted: 1 });
 }
 
+export function setAccountHidden(id: string, hidden: boolean) {
+	return updateAccount(id, { hidden });
+}
+
 // Number of live transactions referencing this account; a non-zero count blocks
 // deletion so we never orphan transactions.
 export function countAccountTransactions(id: string) {

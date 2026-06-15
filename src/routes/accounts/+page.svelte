@@ -34,7 +34,12 @@
 		<ul class="space-y-2">
 			{#each accounts as account (account.id)}
 				<li class="flex items-center justify-between rounded-xl border border-ink/10 bg-white px-4 py-3 shadow-sm">
-					<span class="text-base font-medium">{account.name}</span>
+					<span class="flex items-center gap-2">
+						<span class="text-base font-medium">{account.name}</span>
+						{#if account.hidden}
+							<span class="rounded-full bg-ink/10 px-2 py-0.5 text-xs font-medium text-ink/50">Hidden</span>
+						{/if}
+					</span>
 					<button type="button" aria-label="Edit {account.name}" onclick={() => edit(account)} class="flex h-8 w-8 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
 						<Icon src={editPencil} class="h-4 w-4" />
 					</button>

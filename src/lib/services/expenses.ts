@@ -16,10 +16,11 @@ export function pendingExpenseCards() {
 		const accountName: Record<string, string> = Object.fromEntries(
 			accounts.map((a) => [a.id, a.name])
 		);
+		const hiddenAccounts = new Set(accounts.filter((a) => a.hidden).map((a) => a.id));
 
 		// Only outflows are reviewed in this flow; income is never "pending".
 		return pending
-			.filter((t) => t.direction === 'out' && !t.hidden)
+			.filter((t) => t.direction === 'out' && !t.hidden && !hiddenAccounts.has(t.accountId))
 			.map(
 				(t): ExpenseCard => ({
 					id: t.id!,

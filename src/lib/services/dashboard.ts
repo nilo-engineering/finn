@@ -52,14 +52,23 @@ function toBar(primaryLabel: string, accumulated: number, limit: number): Budget
 // percentage of the total limit.
 export function budgetBars() {
 	return liveQuery(async () => {
-		const [categories, transactions] = await Promise.all([
+		const [categories, transactions, accounts] = await Promise.all([
 			db.categories.filter((c) => c.deleted !== 1).toArray(),
-			db.transactions.filter((t) => t.deleted !== 1).toArray()
+			db.transactions.filter((t) => t.deleted !== 1).toArray(),
+			db.accounts.filter((a) => a.deleted !== 1).toArray()
 		]);
+
+		const hiddenAccounts = new Set(accounts.filter((a) => a.hidden).map((a) => a.id));
 
 		const yearWindow = periodWindow('Year');
 		const yearlyIncome = transactions
-			.filter((t) => t.direction === 'in' && !t.hidden && inWindow(t.date, yearWindow))
+			.filter(
+				(t) =>
+					t.direction === 'in' &&
+					!t.hidden &&
+					!hiddenAccounts.has(t.accountId) &&
+					inWindow(t.date, yearWindow)
+			)
 			.reduce((sum, t) => sum + t.amount, 0);
 
 		const totalLimit: Record<Period, number> = {
@@ -73,7 +82,11 @@ export function budgetBars() {
 			const window = periodWindow(period);
 			const outflows = transactions.filter(
 				(t) =>
-					t.direction === 'out' && t.status === 'reviewed' && !t.hidden && inWindow(t.date, window)
+					t.direction === 'out' &&
+					t.status === 'reviewed' &&
+					!t.hidden &&
+					!hiddenAccounts.has(t.accountId) &&
+					inWindow(t.date, window)
 			);
 			const accumulated = outflows.reduce((sum, t) => sum + t.amount, 0);
 

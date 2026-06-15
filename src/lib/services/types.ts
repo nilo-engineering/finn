@@ -55,6 +55,7 @@ export type AccountView = {
 	id: string;
 	name: string;
 	txCount: number; // transactions referencing this account; >0 blocks delete
+	hidden: boolean; // its transactions are excluded from the dashboard
 };
 
 export type CategoryView = {

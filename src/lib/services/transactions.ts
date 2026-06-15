@@ -28,6 +28,7 @@ export function transactionList() {
 		const categoryName: Record<string, string> = Object.fromEntries(
 			categories.map((c) => [c.id, c.name])
 		);
+		const hiddenAccounts = new Set(accounts.filter((a) => a.hidden).map((a) => a.id));
 
 		// `date` is day-granular, so fall back to `time` then `createdAt` to keep
 		// same-day transactions in a stable newest-first order.
@@ -36,7 +37,9 @@ export function transactionList() {
 				b.date.localeCompare(a.date) || b.time.localeCompare(a.time) || b.createdAt - a.createdAt
 		);
 
-		return txs.map(
+		return txs
+			.filter((t) => !hiddenAccounts.has(t.accountId))
+			.map(
 			(t): TransactionView => ({
 				id: t.id!,
 				title: t.title,

@@ -12,6 +12,7 @@ export interface Account extends Syncable {
 	id?: string; // UUID minted at insert (crypto.randomUUID)
 	name: string; // 'NuBank', 'BTG Pactual', 'CAIXA'
 	type: string; // e.g. 'bank'
+	hidden?: boolean; // its transactions are excluded from dashboard aggregations; absent = visible
 }
 
 export interface Category extends Syncable {

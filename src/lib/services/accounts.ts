@@ -4,6 +4,7 @@ import {
 	addAccount,
 	updateAccount,
 	deleteAccount,
+	setAccountHidden,
 	countAccountTransactions
 } from '$lib/db/accounts';
 import type { AccountView } from './types';
@@ -18,7 +19,8 @@ export function accountList() {
 				async (a): Promise<AccountView> => ({
 					id: a.id!,
 					name: a.name,
-					txCount: await countAccountTransactions(a.id!)
+					txCount: await countAccountTransactions(a.id!),
+					hidden: a.hidden ?? false
 				})
 			)
 		);
@@ -36,4 +38,8 @@ export function renameAccount(id: string, name: string) {
 
 export function removeAccount(id: string) {
 	return deleteAccount(id);
+}
+
+export function hideAccount(id: string, hidden: boolean) {
+	return setAccountHidden(id, hidden);
 }

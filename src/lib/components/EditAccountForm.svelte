@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { renameAccount, removeAccount } from '$lib/services/accounts';
+	import { renameAccount, removeAccount, hideAccount } from '$lib/services/accounts';
 	import type { AccountView } from '$lib/services/types';
 
 	type Props = {
@@ -13,6 +13,7 @@
 	// Seeded once on mount; the parent remounts this form (via `{#key}`) when a
 	// different account is opened, so this one-time snapshot is intentional.
 	let name = $state(untrack(() => account.name));
+	let hidden = $state(untrack(() => account.hidden));
 	let error = $state('');
 
 	async function save(e: SubmitEvent) {
@@ -24,6 +25,7 @@
 		}
 		try {
 			await renameAccount(account.id, trimmed);
+			await hideAccount(account.id, hidden);
 			close();
 		} catch (e) {
 			if (e instanceof Error && e.name === 'ConstraintError') {
@@ -47,6 +49,14 @@
 		<span class="text-sm text-ink/60">Name</span>
 		<!-- svelte-ignore a11y_autofocus -->
 		<input type="text" bind:value={name} autofocus placeholder="e.g. NuBank" class="rounded-xl border border-ink/15 px-3 py-2 text-base outline-none focus:border-primary" />
+	</label>
+
+	<label class="flex items-center justify-between gap-3">
+		<span class="flex flex-col">
+			<span class="text-sm font-medium">Hide from dashboard</span>
+			<span class="text-xs text-ink/50">Its transactions won't count toward your budgets.</span>
+		</span>
+		<input type="checkbox" bind:checked={hidden} class="h-5 w-5 shrink-0 accent-primary" />
 	</label>
 
 	{#if error}
