@@ -47,11 +47,15 @@
 		await loadItems();
 	}
 
-	async function syncNow() {
+	async function syncNow(mode: 'fast' | 'full') {
 		busy = true;
 		error = null;
 		result = null;
-		const res = await fetch('/api/banks/sync', { method: 'POST' });
+		const res = await fetch('/api/banks/sync', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ mode })
+		});
 		if (res.ok) {
 			const { accountsAdded, transactionsAdded } = (await res.json()) as {
 				accountsAdded: number;
@@ -78,7 +82,7 @@
 			<h1 class="text-2xl font-semibold text-primary-deep">Banks</h1>
 		</div>
 
-		<p class="mb-4 text-sm text-ink/60">Connect your banks in MeuPluggy, then paste an itemId here. “Sync banks” pulls the latest transactions as pending, ready to review.</p>
+		<p class="mb-4 text-sm text-ink/60">Connect your banks in MeuPluggy, then paste an itemId here. Syncing pulls the latest transactions as pending, ready to review.</p>
 
 		<div class="flex gap-2">
 			<input type="text" bind:value={itemId} placeholder="Paste an itemId…" class="flex-1 rounded-xl border border-ink/15 px-3 py-2 text-sm outline-none focus:border-primary" />
@@ -110,9 +114,15 @@
 				{/each}
 			</ul>
 
-			<button type="button" onclick={syncNow} disabled={busy} class="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white shadow-sm transition-transform duration-150 hover:scale-[1.02] active:scale-95 disabled:opacity-50">
-				{busy ? 'Syncing…' : 'Sync banks'}
-			</button>
+			<div class="mt-6 flex gap-2">
+				<button type="button" onclick={() => syncNow('fast')} disabled={busy} class="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white shadow-sm transition-transform duration-150 hover:scale-[1.02] active:scale-95 disabled:opacity-50">
+					{busy ? 'Syncing…' : 'Fast sync'}
+				</button>
+				<button type="button" onclick={() => syncNow('full')} disabled={busy} class="flex-1 rounded-xl border border-primary px-4 py-3 text-sm font-medium text-primary shadow-sm transition-transform duration-150 hover:scale-[1.02] active:scale-95 disabled:opacity-50">
+					{busy ? 'Syncing…' : 'Full sync'}
+				</button>
+			</div>
+			<p class="mt-2 text-xs text-ink/50">Fast sync pulls new transactions since the last sync. Full sync re-pulls everything from the start of this year.</p>
 		{:else}
 			<p class="mt-6 text-sm text-ink/50">No connections yet.</p>
 		{/if}

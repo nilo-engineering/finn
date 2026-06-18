@@ -3,12 +3,19 @@ import type { Account as PluggyAccount, Transaction as PluggyTransaction } from 
 import { pool } from './db';
 import { getPluggy } from './pluggy';
 
-// First sync for an item has no cursor, so bound the fetch to a recent window.
-const DEFAULT_LOOKBACK_DAYS = 90;
-const DAY_MS = 86_400_000;
+// 'fast' pulls only the delta since each item's last sync cursor; 'full' re-pulls
+// the whole year-to-date. Dedup is by externalId, so 'full' only costs extra
+// fetching, never duplicate rows.
+export type SyncMode = 'fast' | 'full';
 
 function isoDate(epochMs: number): string {
 	return new Date(epochMs).toISOString().slice(0, 10);
+}
+
+// Jan 1 of the current year — the floor for a full sync, and the fallback for a
+// fast sync of an item that has never been synced.
+function startOfCurrentYear(): string {
+	return `${new Date().getUTCFullYear()}-01-01`;
 }
 
 // Pluggy `amount` sign meaning flips by account type: for BANK accounts a positive
@@ -112,7 +119,9 @@ type FetchedAccount = { account: PluggyAccount; txs: PluggyTransaction[] };
 // (the 45s loop / tab focus / reconnect) firing mid-sync would advance its
 // `lastPulledAt` cursor past rows still being fetched, hiding them from every
 // future delta pull. Dedup is by externalId, so re-running is safe. Returns counts.
-export async function syncBanks(): Promise<{ accountsAdded: number; transactionsAdded: number }> {
+export async function syncBanks(
+	mode: SyncMode = 'fast'
+): Promise<{ accountsAdded: number; transactionsAdded: number }> {
 	const pluggy = getPluggy();
 
 	// Phase 1: which items to sync (quick read).
@@ -123,7 +132,12 @@ export async function syncBanks(): Promise<{ accountsAdded: number; transactions
 	// Phase 2: all network I/O, collected into memory — no DB writes here.
 	const fetched: FetchedAccount[] = [];
 	for (const item of items) {
-		const dateFrom = isoDate(item.last_synced_at ?? Date.now() - DEFAULT_LOOKBACK_DAYS * DAY_MS);
+		// Full sync (or a never-synced item) re-pulls from the year start; fast sync
+		// pulls only the delta since this item's cursor.
+		const dateFrom =
+			mode === 'full' || item.last_synced_at === null
+				? startOfCurrentYear()
+				: isoDate(item.last_synced_at);
 		const accounts = await pluggy.fetchAccounts(item.id);
 		for (const account of accounts.results) {
 			const txs = await pluggy.fetchAllTransactions(account.id, { dateFrom });
