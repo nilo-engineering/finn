@@ -3,6 +3,11 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { deLocalizeUrl, getTextDirection } from '$lib/paraglide/runtime';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { SESSION_COOKIE, verifySessionCookie } from '$lib/server/auth';
+import { migrate } from '$lib/server/db';
+
+// Apply the schema once at startup. Top-level await holds off serving requests
+// until the (idempotent) migration completes, so prod self-migrates on boot.
+await migrate();
 
 // Gate the whole app behind login. /login stays open; /api/* self-guards and
 // returns 401 (redirecting a fetch would be wrong). deLocalizeUrl strips any
