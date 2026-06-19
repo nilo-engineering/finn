@@ -10,7 +10,8 @@ export interface Syncable {
 
 export interface Account extends Syncable {
 	id?: string; // UUID minted at insert (crypto.randomUUID)
-	name: string; // 'NuBank', 'BTG Pactual', 'CAIXA'
+	name: string; // bank/provider name: 'NuBank', 'BTG Pactual', 'CAIXA' (authoritative; not user-editable)
+	customName?: string; // optional user label; overrides `name` for display when set
 	type: string; // e.g. 'bank'
 	hidden?: boolean; // its transactions are excluded from dashboard aggregations; absent = visible
 }

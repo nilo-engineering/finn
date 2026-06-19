@@ -23,6 +23,7 @@
 			await createCategory(trimmed, classes);
 			close();
 		} catch (err) {
+			console.error(err)
 			if (err instanceof Error && err.name === 'ConstraintError') {
 				error = 'A category with that name already exists.';
 			} else {

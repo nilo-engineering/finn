@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { renameAccount, removeAccount, hideAccount } from '$lib/services/accounts';
+	import { setCustomName, removeAccount, hideAccount } from '$lib/services/accounts';
 	import type { AccountView } from '$lib/services/types';
 
 	type Props = {
@@ -12,27 +12,18 @@
 
 	// Seeded once on mount; the parent remounts this form (via `{#key}`) when a
 	// different account is opened, so this one-time snapshot is intentional.
-	let name = $state(untrack(() => account.name));
+	let customName = $state(untrack(() => account.customName ?? ''));
 	let hidden = $state(untrack(() => account.hidden));
 	let error = $state('');
 
 	async function save(e: SubmitEvent) {
 		e.preventDefault();
-		const trimmed = name.trim();
-		if (!trimmed) {
-			error = 'Please enter a name.';
-			return;
-		}
 		try {
-			await renameAccount(account.id, trimmed);
+			await setCustomName(account.id, customName);
 			await hideAccount(account.id, hidden);
 			close();
-		} catch (e) {
-			if (e instanceof Error && e.name === 'ConstraintError') {
-				error = 'An account with that name already exists.';
-			} else {
-				error = 'Could not save the account.';
-			}
+		} catch {
+			error = 'Could not save the account.';
 		}
 	}
 
@@ -45,10 +36,15 @@
 <form class="flex flex-col gap-5 rounded-2xl bg-white p-6 text-ink shadow-xl" onsubmit={save}>
 	<h2 class="text-lg font-semibold text-primary-deep">Edit account</h2>
 
+	<div class="flex flex-col gap-1">
+		<span class="text-sm text-ink/60">Bank name</span>
+		<span class="rounded-xl border border-ink/10 bg-ink/5 px-3 py-2 text-base text-ink/50">{account.name}</span>
+	</div>
+
 	<label class="flex flex-col gap-1">
-		<span class="text-sm text-ink/60">Name</span>
+		<span class="text-sm text-ink/60">Custom name</span>
 		<!-- svelte-ignore a11y_autofocus -->
-		<input type="text" bind:value={name} autofocus placeholder="e.g. NuBank" class="rounded-xl border border-ink/15 px-3 py-2 text-base outline-none focus:border-primary" />
+		<input type="text" bind:value={customName} autofocus placeholder="e.g. My Spending Card" class="rounded-xl border border-ink/15 px-3 py-2 text-base outline-none focus:border-primary" />
 	</label>
 
 	<label class="flex items-center justify-between gap-3">

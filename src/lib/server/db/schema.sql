@@ -12,11 +12,15 @@
 CREATE TABLE IF NOT EXISTS accounts (
   id text PRIMARY KEY,
   name text NOT NULL,
+  "customName" text,
   type text NOT NULL,
   "externalId" text,
   "updatedAt" bigint NOT NULL,
   deleted smallint NOT NULL DEFAULT 0
 );
+
+-- Idempotent: backfills the column on databases created before customName existed.
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS "customName" text;
 
 CREATE TABLE IF NOT EXISTS categories (
   id text PRIMARY KEY,

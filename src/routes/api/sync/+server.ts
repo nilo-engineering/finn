@@ -7,7 +7,7 @@ type Table = 'accounts' | 'categories' | 'transactions';
 // UPDATE clause. Parents (accounts, categories) come before transactions so FK
 // targets exist when transactions are applied.
 const COLUMNS: Record<Table, string[]> = {
-	accounts: ['id', 'name', 'type', 'updatedAt', 'deleted'],
+	accounts: ['id', 'name', 'customName', 'type', 'updatedAt', 'deleted'],
 	categories: ['id', 'name', 'classes', 'budgetPercentage', 'updatedAt', 'deleted'],
 	transactions: [
 		'id',

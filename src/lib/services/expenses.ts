@@ -14,7 +14,7 @@ export function pendingExpenseCards() {
 	return liveQuery(async () => {
 		const [pending, accounts] = await Promise.all([listPending(), db.accounts.toArray()]);
 		const accountName: Record<string, string> = Object.fromEntries(
-			accounts.map((a) => [a.id, a.name])
+			accounts.map((a) => [a.id, a.customName?.trim() || a.name])
 		);
 		const hiddenAccounts = new Set(accounts.filter((a) => a.hidden).map((a) => a.id));
 

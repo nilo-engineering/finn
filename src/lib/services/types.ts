@@ -53,7 +53,8 @@ export type CategoryOption = {
 
 export type AccountView = {
 	id: string;
-	name: string;
+	name: string; // bank/provider name (read-only)
+	customName?: string; // optional user label; overrides `name` for display when set
 	txCount: number; // transactions referencing this account; >0 blocks delete
 	hidden: boolean; // its transactions are excluded from the dashboard
 };

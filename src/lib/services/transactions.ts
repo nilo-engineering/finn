@@ -23,7 +23,7 @@ export function transactionList() {
 			db.categories.toArray()
 		]);
 		const accountName: Record<string, string> = Object.fromEntries(
-			accounts.map((a) => [a.id, a.name])
+			accounts.map((a) => [a.id, a.customName?.trim() || a.name])
 		);
 		const categoryName: Record<string, string> = Object.fromEntries(
 			categories.map((c) => [c.id, c.name])

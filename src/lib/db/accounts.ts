@@ -27,6 +27,12 @@ export function setAccountHidden(id: string, hidden: boolean) {
 	return updateAccount(id, { hidden });
 }
 
+// Store undefined for a blank custom name so display falls back to the bank name.
+export function setAccountCustomName(id: string, customName: string) {
+	const trimmed = customName.trim();
+	return updateAccount(id, { customName: trimmed || undefined });
+}
+
 // Number of live transactions referencing this account; a non-zero count blocks
 // deletion so we never orphan transactions.
 export function countAccountTransactions(id: string) {
