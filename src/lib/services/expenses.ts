@@ -18,9 +18,26 @@ export function pendingExpenseCards() {
 		);
 		const hiddenAccounts = new Set(accounts.filter((a) => a.hidden).map((a) => a.id));
 
+		// `date` is day-granular, so fall back to `time` then `createdAt` to keep
+		// same-day transactions in a stable order.
+		pending.sort(
+			(a, b) =>
+				b.date.localeCompare(a.date) || b.time.localeCompare(a.time) || b.createdAt - a.createdAt
+		);
+
+		// Future-dated transactions (e.g. scheduled/not-yet-settled) shouldn't be
+		// reviewed yet. 'en-CA' gives a local 'YYYY-MM-DD' that compares against `date`.
+		const today = new Date().toLocaleDateString('en-CA');
+
 		// Only outflows are reviewed in this flow; income is never "pending".
 		return pending
-			.filter((t) => t.direction === 'out' && !t.hidden && !hiddenAccounts.has(t.accountId))
+			.filter(
+				(t) =>
+					t.direction === 'out' &&
+					!t.hidden &&
+					!hiddenAccounts.has(t.accountId) &&
+					t.date <= today
+			)
 			.map(
 				(t): ExpenseCard => ({
 					id: t.id!,
