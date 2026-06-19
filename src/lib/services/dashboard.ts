@@ -38,6 +38,21 @@ function inWindow(iso: string, window: { start: Date; end: Date }): boolean {
 	return d >= window.start && d <= window.end;
 }
 
+// Periods elapsed in the current year so far, current period included. Used to
+// average year-to-date income across the months/weeks that produced it, rather
+// than across the full year (which would deflate limits early in the year).
+function periodsElapsed(): Record<Period, number> {
+	const now = new Date();
+	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	const startOfYear = new Date(now.getFullYear(), 0, 1);
+	const dayOfYear = Math.round((today.getTime() - startOfYear.getTime()) / 86400000) + 1;
+	return {
+		Year: 1,
+		Month: now.getMonth() + 1,
+		Week: Math.ceil((dayOfYear + startOfYear.getDay()) / 7)
+	};
+}
+
 function toBar(primaryLabel: string, accumulated: number, limit: number): BudgetView {
 	return {
 		primaryLabel,
@@ -47,8 +62,9 @@ function toBar(primaryLabel: string, accumulated: number, limit: number): Budget
 }
 
 // Reactive, income-derived budgets per period. The total limit comes from the
-// year's income (Year = total, Month = /12, Week = /52); accumulated is the sum
-// of reviewed outflows in the period window; each category takes a fixed
+// year's income averaged over the periods elapsed so far (Year = total,
+// Month = /months elapsed, Week = /weeks elapsed); accumulated is the sum of
+// reviewed outflows in the period window; each category takes a fixed
 // percentage of the total limit.
 export function budgetBars() {
 	return liveQuery(async () => {
@@ -71,10 +87,11 @@ export function budgetBars() {
 			)
 			.reduce((sum, t) => sum + t.amount, 0);
 
+		const elapsed = periodsElapsed();
 		const totalLimit: Record<Period, number> = {
 			Year: yearlyIncome,
-			Month: yearlyIncome / 12,
-			Week: yearlyIncome / 52
+			Month: yearlyIncome / elapsed.Month,
+			Week: yearlyIncome / elapsed.Week
 		};
 
 		const result: Record<string, PeriodBudget> = {};
