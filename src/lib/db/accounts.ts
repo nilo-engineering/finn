@@ -1,10 +1,11 @@
 import { db } from './index';
 import type { Account } from './types';
 import { requestSync } from '$lib/sync';
+import { uuid } from './uuid';
 
 export function addAccount(acc: Omit<Account, 'id' | 'updatedAt' | 'deleted'>) {
 	return db.accounts
-		.add({ ...acc, id: crypto.randomUUID(), updatedAt: Date.now(), deleted: 0 })
+		.add({ ...acc, id: uuid(), updatedAt: Date.now(), deleted: 0 })
 		.then((id) => {
 			requestSync();
 			return id;

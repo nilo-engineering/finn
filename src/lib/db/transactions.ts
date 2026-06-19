@@ -1,13 +1,14 @@
 import { db } from './index';
 import type { Transaction } from './types';
 import { requestSync } from '$lib/sync';
+import { uuid } from './uuid';
 
 type NewTransaction = Omit<Transaction, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>;
 
 export function addTransaction(tx: NewTransaction) {
 	const now = Date.now();
 	return db.transactions
-		.add({ ...tx, id: crypto.randomUUID(), createdAt: now, updatedAt: now, deleted: 0 })
+		.add({ ...tx, id: uuid(), createdAt: now, updatedAt: now, deleted: 0 })
 		.then((id) => {
 			requestSync();
 			return id;
@@ -20,7 +21,7 @@ export function bulkAddTransactions(txs: NewTransaction[]) {
 		.bulkAdd(
 			txs.map((tx) => ({
 				...tx,
-				id: crypto.randomUUID(),
+				id: uuid(),
 				createdAt: now,
 				updatedAt: now,
 				deleted: 0

@@ -1,10 +1,11 @@
 import { db } from './index';
 import type { Category } from './types';
 import { requestSync } from '$lib/sync';
+import { uuid } from './uuid';
 
 export function addCategory(cat: Omit<Category, 'id' | 'updatedAt' | 'deleted'>) {
 	return db.categories
-		.add({ ...cat, id: crypto.randomUUID(), updatedAt: Date.now(), deleted: 0 })
+		.add({ ...cat, id: uuid(), updatedAt: Date.now(), deleted: 0 })
 		.then((id) => {
 			requestSync();
 			return id;

@@ -1,5 +1,6 @@
 import type { FinnDB } from './index';
 import type { Account, Category, Transaction } from './types';
+import { uuid } from './uuid';
 
 // `budgetPercentage` is each category's share of the period budget (sums to 100).
 // Sync fields (updatedAt/deleted) are stamped at insert time in seed().
@@ -126,13 +127,13 @@ export async function seed(db: FinnDB): Promise<void> {
 	// name -> id maps below can resolve foreign keys before insert.
 	const categoryRows = categories.map((c) => ({
 		...c,
-		id: crypto.randomUUID(),
+		id: uuid(),
 		updatedAt: now,
 		deleted: 0 as const
 	}));
 	const accountRows = accounts.map((a) => ({
 		...a,
-		id: crypto.randomUUID(),
+		id: uuid(),
 		updatedAt: now,
 		deleted: 0 as const
 	}));
@@ -143,7 +144,7 @@ export async function seed(db: FinnDB): Promise<void> {
 	const accountIdByName = new Map(accountRows.map((a) => [a.name, a.id]));
 
 	const income: Transaction[] = incomeDeposits.map((d) => ({
-		id: crypto.randomUUID(),
+		id: uuid(),
 		direction: 'in',
 		amount: d.amount,
 		title: 'Salary',
@@ -160,7 +161,7 @@ export async function seed(db: FinnDB): Promise<void> {
 	}));
 
 	const reviewed: Transaction[] = reviewedExpenses.map((e) => ({
-		id: crypto.randomUUID(),
+		id: uuid(),
 		direction: 'out',
 		amount: e.amount,
 		title: e.title,
@@ -177,7 +178,7 @@ export async function seed(db: FinnDB): Promise<void> {
 	}));
 
 	const pending: Transaction[] = pendingOutflows.map((tx) => ({
-		id: crypto.randomUUID(),
+		id: uuid(),
 		direction: 'out',
 		amount: tx.amount,
 		title: tx.title,
