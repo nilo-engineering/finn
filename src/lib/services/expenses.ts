@@ -4,6 +4,7 @@ import {
 	listPending,
 	reviewTransaction,
 	unreviewTransaction,
+	setTransactionHidden,
 	updateTransaction
 } from '$lib/db/transactions';
 import { formatDate, money } from './format';
@@ -71,4 +72,12 @@ export function unreviewExpense(id: string) {
 
 export function renameExpense(id: string, title: string) {
 	return updateTransaction(id, { title });
+}
+
+export function hideExpense(id: string) {
+	return setTransactionHidden(id, true);
+}
+
+export function unhideExpense(id: string) {
+	return setTransactionHidden(id, false);
 }

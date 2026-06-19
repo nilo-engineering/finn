@@ -5,11 +5,14 @@
 		categoryOptions,
 		reviewExpense,
 		unreviewExpense,
-		renameExpense
+		renameExpense,
+		hideExpense,
+		unhideExpense
 	} from '$lib/services/expenses';
 	import { debounce } from '$lib/utils/debounce';
 	import Icon from '$lib/components/Icon.svelte';
 	import skipNext from 'iconoir/icons/skip-next.svg?raw';
+	import eyeClosed from 'iconoir/icons/eye-closed.svg?raw';
 
 	type Props = {
 		open: boolean;
@@ -68,7 +71,7 @@
 	});
 
 	// Briefly mark the control activated by a shortcut, since (unlike a click) a keypress
-	// gives no inherent visual cue. Keyed by 'skip', 'undo', or a category id as a string.
+	// gives no inherent visual cue. Keyed by 'skip', 'hide', 'undo', or a category id as a string.
 	let flashKey: string | null = $state(null);
 	let flashTimer: ReturnType<typeof setTimeout> | undefined;
 	function flash(key: string) {
@@ -139,7 +142,7 @@
 		}
 	}
 
-	// Review shortcuts: r = edit title, s = skip, 1..n = pick that category.
+	// Review shortcuts: r = edit title, s = skip, h = hide, 1..n = pick that category.
 	// Disabled while editing the title so the keys type normally, and ignored when a
 	// modifier is held so browser shortcuts (e.g. ⌘R) still work.
 	function onKeydown(e: KeyboardEvent) {
@@ -151,6 +154,10 @@
 			e.preventDefault();
 			flash('skip');
 			skip();
+		} else if (e.key === 'h') {
+			e.preventDefault();
+			flash('hide');
+			hide();
 		} else if (e.key === 'u') {
 			if (!undoAction) return;
 			e.preventDefault();
@@ -180,6 +187,16 @@
 		const wasLast = queue.length === 1;
 		skipped.add(id);
 		registerUndo('Expense skipped', () => skipped.delete(id), wasLast);
+	}
+
+	// Hiding persists `hidden` in the DB, so the card drops out of the pending queue for
+	// good (unlike skip). Undo restores it by clearing the flag again.
+	async function hide() {
+		if (!current) return;
+		const id = current.id;
+		const wasLast = queue.length === 1;
+		await hideExpense(id);
+		registerUndo('Expense hidden', () => unhideExpense(id), wasLast);
 	}
 
 	function onBackdropClick(e: MouseEvent) {
@@ -265,34 +282,48 @@
 
 				<p class="text-center text-sm text-ink/80">{current.description}</p>
 
-				<div class="grid grid-cols-2 gap-3 pt-2">
+				<div class="grid grid-cols-1 gap-3 pt-2">
 					{#each categories as cat, i (cat.id)}
 						<button
 							type="button"
 							onclick={() => selectCategory(cat.id)}
-							class="flex items-center justify-center gap-1.5 rounded-xl px-3 py-3 text-sm font-medium shadow-sm transition-transform duration-150 hover:scale-[1.02] active:scale-95 {cat.classes} {flashKey ===
+							class="relative flex items-center justify-center rounded-xl px-3 py-3 text-sm font-medium shadow-sm transition-transform duration-150 hover:scale-[1.02] active:scale-95 {cat.classes} {flashKey ===
 							String(cat.id)
 								? 'scale-95 ring-2 ring-ink/40'
 								: ''}"
 						>
-							{#if i < 9}{@render keyHint(String(i + 1))}{/if}
+							{#if i < 9}<span class="absolute left-3">{@render keyHint(String(i + 1))}</span>{/if}
 							{cat.name}
 						</button>
 					{/each}
 				</div>
 
-				<button
-					type="button"
-					onclick={skip}
-					class="mt-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink {flashKey ===
-					'skip'
-						? 'bg-ink/10 text-ink ring-2 ring-ink/20'
-						: 'text-ink/60'}"
-				>
-					<Icon src={skipNext} class="h-4 w-4" />
-					Skip for now
-					{@render keyHint('s')}
-				</button>
+				<div class="mt-1 grid grid-cols-2 gap-3">
+					<button
+						type="button"
+						onclick={hide}
+						class="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink {flashKey ===
+						'hide'
+							? 'bg-ink/10 text-ink ring-2 ring-ink/20'
+							: 'text-ink/60'}"
+					>
+						<Icon src={eyeClosed} class="h-4 w-4" />
+						Hide
+						{@render keyHint('h')}
+					</button>
+					<button
+						type="button"
+						onclick={skip}
+						class="flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-ink/5 hover:text-ink {flashKey ===
+						'skip'
+							? 'bg-ink/10 text-ink ring-2 ring-ink/20'
+							: 'text-ink/60'}"
+					>
+						<Icon src={skipNext} class="h-4 w-4" />
+						Skip for now
+						{@render keyHint('s')}
+					</button>
+				</div>
 			</div>
 		{/if}
 
