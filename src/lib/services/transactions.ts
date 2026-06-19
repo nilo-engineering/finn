@@ -1,7 +1,13 @@
 import { liveQuery } from 'dexie';
 import { db } from '$lib/db';
 import type { Account } from '$lib/db/types';
-import { bulkAddTransactions, setTransactionHidden, updateTransaction } from '$lib/db/transactions';
+import {
+	bulkAddTransactions,
+	reviewTransaction,
+	setTransactionHidden,
+	unreviewTransaction,
+	updateTransaction
+} from '$lib/db/transactions';
 import { parseCsv } from '$lib/import/csv';
 import {
 	detectProfile,
@@ -49,6 +55,7 @@ export function transactionList() {
 				amountLabel: money(t.amount),
 				direction: t.direction,
 				accountName: accountName[t.accountId] ?? '',
+				categoryId: t.categoryId,
 				categoryName: t.categoryId !== null ? (categoryName[t.categoryId] ?? '') : 'Uncategorized',
 				method: t.method,
 				counterparty: t.counterparty,
@@ -62,7 +69,18 @@ export function renameTransaction(id: string, title: string) {
 	return updateTransaction(id, { title });
 }
 
+// Assign (or change) a transaction's category from the list, marking it reviewed.
+export function setTransactionCategory(id: string, categoryId: string) {
+	return reviewTransaction(id, categoryId);
+}
+
+// Clear a transaction's category, sending it back to the pending review queue.
+export function clearTransactionCategory(id: string) {
+	return unreviewTransaction(id);
+}
+
 export { setTransactionHidden };
+export { categoryOptions } from './expenses';
 
 export interface ImportPreview {
 	profile: ImportProfile | null; // null when auto-detect found no match

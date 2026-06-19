@@ -2,15 +2,26 @@
 	import { resolve } from '$app/paths';
 	import Icon from '$lib/components/Icon.svelte';
 	import FilterPill from '$lib/components/FilterPill.svelte';
+	import CategoryPicker from '$lib/components/CategoryPicker.svelte';
 	import navArrowLeft from 'iconoir/icons/nav-arrow-left.svg?raw';
 	import eyeClosed from 'iconoir/icons/eye-closed.svg?raw';
 	import eye from 'iconoir/icons/eye.svg?raw';
-	import { transactionList, renameTransaction, setTransactionHidden } from '$lib/services/transactions';
+	import {
+		transactionList,
+		renameTransaction,
+		setTransactionHidden,
+		setTransactionCategory,
+		clearTransactionCategory,
+		categoryOptions
+	} from '$lib/services/transactions';
 	import { debounce } from '$lib/utils/debounce';
 	import TransactionRawModal, { type RawPayload } from '$lib/components/TransactionRawModal.svelte';
 
 	const txStore = transactionList();
 	const transactions = $derived($txStore ?? []);
+
+	const catStore = categoryOptions();
+	const categories = $derived($catStore ?? []);
 
 	let search = $state('');
 	let direction = $state(''); // '' | 'in' | 'out'
@@ -204,9 +215,18 @@
 							{#if tx.counterparty}
 								<p class="truncate text-sm font-medium text-ink/70">{tx.counterparty}</p>
 							{/if}
-							<p class="truncate text-sm text-ink/50">
-								{tx.accountName} · {tx.categoryName} · {tx.method}
-							</p>
+							<div class="flex items-center gap-1 text-sm text-ink/50">
+								<span class="truncate">{tx.accountName}</span>
+								<span>·</span>
+								<CategoryPicker
+									categories={categories}
+									selectedId={tx.categoryId}
+									onSelect={(cid) =>
+										cid ? setTransactionCategory(tx.id, cid) : clearTransactionCategory(tx.id)}
+								/>
+								<span>·</span>
+								<span class="truncate">{tx.method}</span>
+							</div>
 							{#if tx.description}
 								<p class="truncate text-xs text-ink/40">{tx.description}</p>
 							{/if}

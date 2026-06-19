@@ -41,6 +41,7 @@ export type TransactionView = {
 	amountLabel: string; // "$6.50"
 	direction: Direction; // drives amount color and sign
 	accountName: string; // "NuBank"
+	categoryId: string | null; // null = Uncategorized; drives the category picker's current selection
 	categoryName: string; // "Comfort" or "Uncategorized"
 	method: string; // "Credit" or "Debit"
 	counterparty?: string; // the other party (receiver/merchant); absent when unknown
