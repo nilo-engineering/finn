@@ -49,12 +49,27 @@ CREATE TABLE IF NOT EXISTS transactions (
   "sourceRow" text,
   "externalId" text,
   "raw" jsonb,
+  "counterparty" text,
   "updatedAt" bigint NOT NULL,
   deleted smallint NOT NULL DEFAULT 0
 );
 
 -- Idempotent: backfills the column on databases created before raw existed.
 ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "raw" jsonb;
+
+-- Idempotent: the other party's name (Pluggy receiver/merchant/payer). Values are
+-- populated/backfilled by syncBanks, not here — a full sync repairs existing rows.
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "counterparty" text;
+
+-- Resolved CNPJ -> company name, cached from OpenCNPJ so each CNPJ is fetched once
+-- across syncs/backfills. Server-only. `name` may be NULL (negative cache: looked up
+-- but not found) to avoid re-querying. Stores the display name already chosen
+-- (nome_fantasia when present, else razao_social).
+CREATE TABLE IF NOT EXISTS cnpj_cache (
+  cnpj text PRIMARY KEY,
+  name text,
+  "fetchedAt" bigint NOT NULL
+);
 
 -- Registered Pluggy connections (itemIds). Server-only; not synced to clients.
 -- The user pastes an itemId on /banks; "Sync banks" fetches each item's accounts

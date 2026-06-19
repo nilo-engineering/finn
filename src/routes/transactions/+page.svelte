@@ -201,6 +201,9 @@
 									{tx.title}
 								</button>
 							{/if}
+							{#if tx.counterparty}
+								<p class="truncate text-sm font-medium text-ink/70">{tx.counterparty}</p>
+							{/if}
 							<p class="truncate text-sm text-ink/50">
 								{tx.accountName} · {tx.categoryName} · {tx.method}
 							</p>

@@ -20,6 +20,7 @@ const COLUMNS: Record<Table, string[]> = {
 		'accountId',
 		'categoryId',
 		'method',
+		'counterparty',
 		'status',
 		'hidden',
 		'createdAt',

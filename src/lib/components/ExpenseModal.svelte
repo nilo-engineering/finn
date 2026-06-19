@@ -255,6 +255,9 @@
 
 				<div class="flex flex-col items-center gap-1">
 					<span class="text-4xl font-semibold text-primary-deep">{current.amountLabel}</span>
+					{#if current.counterparty}
+						<span class="text-center text-sm font-medium text-ink/70">{current.counterparty}</span>
+					{/if}
 					<span class="text-sm text-ink/60"
 						>{current.dateLabel} · {current.accountName} · {current.method}</span
 					>

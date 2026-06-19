@@ -29,7 +29,8 @@ export function pendingExpenseCards() {
 					amountLabel: money(t.amount),
 					dateLabel: formatDate(t.date),
 					accountName: accountName[t.accountId] ?? '',
-					method: t.method
+					method: t.method,
+					counterparty: t.counterparty
 				})
 			);
 	});

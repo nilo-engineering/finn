@@ -51,6 +51,7 @@ export function transactionList() {
 				accountName: accountName[t.accountId] ?? '',
 				categoryName: t.categoryId !== null ? (categoryName[t.categoryId] ?? '') : 'Uncategorized',
 				method: t.method,
+				counterparty: t.counterparty,
 				hidden: t.hidden ?? false
 			})
 		);

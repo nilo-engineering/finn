@@ -29,6 +29,7 @@ export type ExpenseCard = {
 	dateLabel: string; // "Jun 6, 2026"
 	accountName: string; // "NuBank"
 	method: string; // "Credit"
+	counterparty?: string; // the other party (receiver/merchant); absent when unknown
 };
 
 export type TransactionView = {
@@ -42,6 +43,7 @@ export type TransactionView = {
 	accountName: string; // "NuBank"
 	categoryName: string; // "Comfort" or "Uncategorized"
 	method: string; // "Credit" or "Debit"
+	counterparty?: string; // the other party (receiver/merchant); absent when unknown
 	hidden: boolean; // dims the row; excluded from dashboard
 };
 

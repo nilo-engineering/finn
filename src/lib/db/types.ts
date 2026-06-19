@@ -38,6 +38,7 @@ export interface Transaction extends Syncable {
 	hidden?: boolean; // excluded from dashboard aggregations; absent = visible
 	createdAt: number; // Date.now() at insert
 	sourceRow?: string; // original raw CSV line; only set on import
+	counterparty?: string; // the other party: Pluggy receiver/merchant/payer name; absent for CSV imports
 }
 
 // Single-row cursors the sync engine persists (lastPulledAt / lastPushedAt).
