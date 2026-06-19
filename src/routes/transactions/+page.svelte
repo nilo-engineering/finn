@@ -7,6 +7,7 @@
 	import eye from 'iconoir/icons/eye.svg?raw';
 	import { transactionList, renameTransaction, setTransactionHidden } from '$lib/services/transactions';
 	import { debounce } from '$lib/utils/debounce';
+	import TransactionRawModal, { type RawPayload } from '$lib/components/TransactionRawModal.svelte';
 
 	const txStore = transactionList();
 	const transactions = $derived($txStore ?? []);
@@ -91,6 +92,42 @@
 			titleInputEl?.blur();
 		}
 	}
+
+	// CTRL/⌘+click a row to inspect its original provider/import data. `externalId` and
+	// `raw` are server-only, so fetch them on demand rather than from the local Dexie store.
+	let rawOpen = $state(false);
+	let rawLoading = $state(false);
+	let rawPayload: RawPayload | null = $state(null);
+
+	async function openRaw(id: string) {
+		rawOpen = true;
+		rawLoading = true;
+		rawPayload = null;
+		try {
+			const res = await fetch(`/api/transactions/${id}`);
+			if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+			rawPayload = (await res.json()) as RawPayload;
+		} catch (e) {
+			rawPayload = {
+				externalId: null,
+				raw: null,
+				sourceRow: null,
+				error: e instanceof Error ? e.message : String(e)
+			};
+		} finally {
+			rawLoading = false;
+		}
+	}
+
+	// Capture phase so this runs before the inner title button's click handler; stopping
+	// propagation then prevents the click from also entering inline title-edit mode.
+	function onRowClickCapture(e: MouseEvent, id: string) {
+		if (e.ctrlKey || e.metaKey) {
+			e.preventDefault();
+			e.stopPropagation();
+			openRaw(id);
+		}
+	}
 </script>
 
 <div class="mx-auto flex min-h-screen w-full max-w-125 flex-col bg-background text-ink">
@@ -139,6 +176,7 @@
 						<li class="px-1 pt-4 pb-1 text-sm font-semibold text-ink/40 first:pt-0">{tx.monthLabel}</li>
 					{/if}
 					<li
+						onclickcapture={(e) => onRowClickCapture(e, tx.id)}
 						class="flex items-center justify-between gap-3 rounded-xl border border-ink/10 bg-white px-4 py-3 shadow-sm transition-opacity {tx.hidden
 							? 'opacity-50'
 							: ''}"
@@ -192,3 +230,5 @@
 		{/if}
 	</main>
 </div>
+
+<TransactionRawModal bind:open={rawOpen} loading={rawLoading} payload={rawPayload} />

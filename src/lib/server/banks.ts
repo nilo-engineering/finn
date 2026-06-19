@@ -89,8 +89,8 @@ async function insertTransaction(
 	await client.query(
 		`INSERT INTO transactions
 		 (id, direction, amount, title, description, date, time, "accountId", "categoryId",
-		  method, status, hidden, "createdAt", "sourceRow", "externalId", "updatedAt", deleted)
-		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULL,$9,'pending',NULL,$10,NULL,$11,$12,0)`,
+		  method, status, hidden, "createdAt", "sourceRow", "externalId", "raw", "updatedAt", deleted)
+		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULL,$9,'pending',NULL,$10,NULL,$11,$12,$13,0)`,
 		[
 			crypto.randomUUID(),
 			direction,
@@ -103,6 +103,7 @@ async function insertTransaction(
 			method,
 			now,
 			tx.id,
+			JSON.stringify(tx),
 			now
 		]
 	);

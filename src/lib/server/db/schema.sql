@@ -5,9 +5,10 @@
 -- updatedAt/createdAt are epoch millis (bigint). updatedAt drives last-write-wins.
 -- camelCase columns are quoted so Postgres preserves their case.
 --
--- "externalId" is server-only (NOT in the /api/sync COLUMNS list): it dedups rows
--- pulled from a provider (Open Finance / Pluggy) and is never sent to or written
--- by clients.
+-- "externalId" and "raw" are server-only (NOT in the /api/sync COLUMNS list):
+-- "externalId" dedups rows pulled from a provider (Open Finance / Pluggy); "raw" caches
+-- the provider's original transaction object for inspection. Neither is sent to or
+-- written by clients.
 
 CREATE TABLE IF NOT EXISTS accounts (
   id text PRIMARY KEY,
@@ -47,9 +48,13 @@ CREATE TABLE IF NOT EXISTS transactions (
   "createdAt" bigint NOT NULL,
   "sourceRow" text,
   "externalId" text,
+  "raw" jsonb,
   "updatedAt" bigint NOT NULL,
   deleted smallint NOT NULL DEFAULT 0
 );
+
+-- Idempotent: backfills the column on databases created before raw existed.
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "raw" jsonb;
 
 -- Registered Pluggy connections (itemIds). Server-only; not synced to clients.
 -- The user pastes an itemId on /banks; "Sync banks" fetches each item's accounts
