@@ -143,12 +143,14 @@ export async function sync(): Promise<void> {
 	}
 }
 
-// Force a full reconciliation: reset the pull cursor so the next pull re-fetches
-// every server row (since=0), not just the delta since the last cursor. Needed
-// after a bank sync — the server ingests rows whose `updatedAt` can sit behind the
-// client's cursor, and transactions are dedup'd by externalId so a delta pull
-// would never re-send them. A full pull is idempotent (applyTable is last-write-wins).
+// Force a full bidirectional reconciliation: reset both cursors so the next sync
+// re-pushes every local row and re-pulls every server row (since=0), not just the
+// deltas. Both directions are needed: the push cursor can sit ahead of a local edit
+// (so a hidden toggle never reaches the server), and after a bank sync the server
+// ingests rows whose `updatedAt` sits behind the client's pull cursor. Idempotent —
+// unchanged rows are last-write-wins no-ops on both ends.
 export async function fullSync(): Promise<void> {
+	await setCursor('lastPushedAt', 0);
 	await setCursor('lastPulledAt', 0);
 	await sync();
 }
