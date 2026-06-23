@@ -36,6 +36,9 @@ export function transactionList() {
 		);
 		const hiddenAccounts = new Set(accounts.filter((a) => a.hidden).map((a) => a.id));
 
+		// 'en-CA' gives a local 'YYYY-MM-DD' that compares against `date` lexically.
+		const today = new Date().toLocaleDateString('en-CA');
+
 		// `date` is day-granular, so fall back to `time` then `createdAt` to keep
 		// same-day transactions in a stable newest-first order.
 		txs.sort(
@@ -59,7 +62,8 @@ export function transactionList() {
 				categoryName: t.categoryId !== null ? (categoryName[t.categoryId] ?? '') : 'Uncategorized',
 				method: t.method,
 				counterparty: t.counterparty,
-				hidden: t.hidden ?? false
+				hidden: t.hidden ?? false,
+				isFuture: t.date > today
 			})
 		);
 	});

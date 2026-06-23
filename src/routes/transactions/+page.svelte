@@ -31,6 +31,8 @@
 	let category = $state(''); // '' | categoryId | UNCATEGORIZED
 	// Yield credits flood the list with noise, so hide them unless explicitly toggled on.
 	let showYield = $state(false);
+	// Future-dated (scheduled/not-yet-settled) transactions are hidden unless toggled on.
+	let showFuture = $state(false);
 
 	const YIELD_TITLE = 'ValorRendimentoSaldoRemunerado';
 	// Sentinel filter value for transactions with no category assigned.
@@ -66,6 +68,7 @@
 		const q = search.trim().toLowerCase();
 		return transactions.filter((t) => {
 			if (!showYield && t.title === YIELD_TITLE) return false;
+			if (!showFuture && t.isFuture) return false;
 			if (direction && t.direction !== direction) return false;
 			if (method && t.method !== method) return false;
 			if (account && t.accountName !== account) return false;
@@ -194,6 +197,16 @@
 							: 'text-ink/50 hover:bg-ink/5 hover:text-ink'}"
 					>
 						Yield credits
+					</button>
+					<button
+						type="button"
+						onclick={() => (showFuture = !showFuture)}
+						aria-pressed={showFuture}
+						class="rounded-full px-3 py-1 text-sm transition-colors {showFuture
+							? 'bg-primary text-white'
+							: 'text-ink/50 hover:bg-ink/5 hover:text-ink'}"
+					>
+						Future
 					</button>
 					{#if anyActive}
 						<button

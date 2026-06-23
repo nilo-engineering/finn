@@ -46,6 +46,7 @@ export type TransactionView = {
 	method: string; // "Credit" or "Debit"
 	counterparty?: string; // the other party (receiver/merchant); absent when unknown
 	hidden: boolean; // dims the row; excluded from dashboard
+	isFuture: boolean; // date > today (scheduled/not-yet-settled)
 };
 
 export type CategoryOption = {
