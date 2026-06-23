@@ -7,7 +7,7 @@ type Table = 'accounts' | 'categories' | 'transactions';
 // UPDATE clause. Parents (accounts, categories) come before transactions so FK
 // targets exist when transactions are applied.
 const COLUMNS: Record<Table, string[]> = {
-	accounts: ['id', 'name', 'customName', 'type', 'updatedAt', 'deleted'],
+	accounts: ['id', 'name', 'customName', 'type', 'hidden', 'updatedAt', 'deleted'],
 	categories: ['id', 'name', 'classes', 'budgetPercentage', 'updatedAt', 'deleted'],
 	transactions: [
 		'id',
@@ -120,6 +120,6 @@ function toDbValue(col: string, value: unknown): unknown {
 function toClientRow(table: Table, row: Record<string, unknown>): Record<string, unknown> {
 	const out: Record<string, unknown> = {};
 	for (const col of COLUMNS[table]) out[col] = row[col];
-	if (table === 'transactions') out.hidden = Boolean(row.hidden);
+	if (COLUMNS[table].includes('hidden')) out.hidden = Boolean(row.hidden);
 	return out;
 }

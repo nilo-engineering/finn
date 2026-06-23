@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS accounts (
   name text NOT NULL,
   "customName" text,
   type text NOT NULL,
+  hidden smallint,
   "externalId" text,
   "updatedAt" bigint NOT NULL,
   deleted smallint NOT NULL DEFAULT 0
@@ -22,6 +23,9 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 -- Idempotent: backfills the column on databases created before customName existed.
 ALTER TABLE accounts ADD COLUMN IF NOT EXISTS "customName" text;
+
+-- Idempotent: backfills hidden on databases created before account-hide existed.
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS hidden smallint;
 
 CREATE TABLE IF NOT EXISTS categories (
   id text PRIMARY KEY,

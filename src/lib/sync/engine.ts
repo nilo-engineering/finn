@@ -38,6 +38,33 @@ export async function migratePushCursor(): Promise<void> {
 	await setCursor('pushCursorResetV1', 1);
 }
 
+// Max rows per push request. Keeps the JSON body well under the adapter's default
+// BODY_SIZE_LIMIT (512 KB) so a large delta — a full re-sync or a big CSV import —
+// doesn't get rejected. ~414 B/row, so 500 rows ≈ 0.2 MB.
+const PUSH_CHUNK = 500;
+
+// Split the delta into batches of at most PUSH_CHUNK rows total, packed in
+// parents-before-children order (accounts, categories, then transactions).
+function chunkChanges(accounts: Account[], categories: Category[], transactions: Transaction[]) {
+	const batches: Changes[] = [];
+	let a = 0;
+	let c = 0;
+	let t = 0;
+	while (a < accounts.length || c < categories.length || t < transactions.length) {
+		let budget = PUSH_CHUNK;
+		const accs = accounts.slice(a, a + budget);
+		a += accs.length;
+		budget -= accs.length;
+		const cats = categories.slice(c, c + budget);
+		c += cats.length;
+		budget -= cats.length;
+		const txs = transactions.slice(t, t + budget);
+		t += txs.length;
+		batches.push({ accounts: accs, categories: cats, transactions: txs });
+	}
+	return batches;
+}
+
 // Upload every local row changed since lastPushedAt; the server applies LWW.
 async function push(): Promise<void> {
 	const since = await getCursor('lastPushedAt');
@@ -49,12 +76,19 @@ async function push(): Promise<void> {
 	const rows = [...accounts, ...categories, ...transactions];
 	if (rows.length === 0) return;
 
-	const res = await fetch('/api/sync', {
-		method: 'POST',
-		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify({ changes: { accounts, categories, transactions } })
-	});
-	assertOk(res, 'push');
+	// Send in bounded batches, but only advance the cursor once every batch lands.
+	// Each request is its own server transaction, so re-sending earlier batches after
+	// a mid-way failure is an idempotent LWW no-op. Advancing per-batch would be unsafe:
+	// rows sharing an updatedAt (e.g. a bulk import) could straddle a batch boundary and
+	// the strict `.above(cursor)` filter would strand the ones left behind.
+	for (const changes of chunkChanges(accounts, categories, transactions)) {
+		const res = await fetch('/api/sync', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ changes })
+		});
+		assertOk(res, 'push');
+	}
 	// Advance the cursor in the same clock as `updatedAt` (the client's), not the
 	// server's serverTime — otherwise server clock skew can park the cursor ahead of
 	// later local edits and they'd never be pushed.
