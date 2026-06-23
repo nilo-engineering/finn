@@ -28,10 +28,13 @@
 	let method = $state(''); // '' | 'Credit' | 'Debit' | ...
 	let account = $state(''); // '' | accountName
 	let month = $state(''); // '' | monthLabel
+	let category = $state(''); // '' | categoryId | UNCATEGORIZED
 	// Yield credits flood the list with noise, so hide them unless explicitly toggled on.
 	let showYield = $state(false);
 
 	const YIELD_TITLE = 'ValorRendimentoSaldoRemunerado';
+	// Sentinel filter value for transactions with no category assigned.
+	const UNCATEGORIZED = '__none__';
 
 	const directionOptions = [
 		{ value: 'in', label: 'Money in' },
@@ -41,13 +44,22 @@
 	const methodOptions = $derived(distinct(transactions.map((t) => t.method)));
 	const accountOptions = $derived(distinct(transactions.map((t) => t.accountName)));
 	const monthOptions = $derived(distinct(transactions.map((t) => t.monthLabel)));
+	const categoryFilterOptions = $derived([
+		...categories.map((c) => ({ value: c.id, label: c.name })),
+		{ value: UNCATEGORIZED, label: 'Uncategorized' }
+	]);
 
 	function distinct(values: string[]): { value: string; label: string }[] {
 		return [...new Set(values.filter(Boolean))].map((v) => ({ value: v, label: v }));
 	}
 
 	const anyActive = $derived(
-		search.trim() !== '' || direction !== '' || method !== '' || account !== '' || month !== ''
+		search.trim() !== '' ||
+			direction !== '' ||
+			method !== '' ||
+			account !== '' ||
+			month !== '' ||
+			category !== ''
 	);
 
 	const filtered = $derived.by(() => {
@@ -58,6 +70,9 @@
 			if (method && t.method !== method) return false;
 			if (account && t.accountName !== account) return false;
 			if (month && t.monthLabel !== month) return false;
+			if (category === UNCATEGORIZED) {
+				if (t.categoryId !== null) return false;
+			} else if (category && t.categoryId !== category) return false;
 			if (
 				q &&
 				!t.title.toLowerCase().includes(q) &&
@@ -75,6 +90,7 @@
 		method = '';
 		account = '';
 		month = '';
+		category = '';
 	}
 
 	let editingId: string | null = $state(null);
@@ -167,6 +183,7 @@
 					<FilterPill label="Direction" bind:value={direction} options={directionOptions} />
 					<FilterPill label="Method" bind:value={method} options={methodOptions} />
 					<FilterPill label="Account" bind:value={account} options={accountOptions} />
+					<FilterPill label="Category" bind:value={category} options={categoryFilterOptions} />
 					<FilterPill label="Month" bind:value={month} options={monthOptions} />
 					<button
 						type="button"
