@@ -33,11 +33,15 @@ export function bulkAddTransactions(txs: NewTransaction[]) {
 		});
 }
 
-export function updateTransaction(id: string, changes: Partial<Transaction>) {
-	return db.transactions.update(id, { ...changes, updatedAt: Date.now() }).then((updated) => {
-		requestSync();
-		return updated;
-	});
+export async function updateTransaction(id: string, changes: Partial<Transaction>) {
+	// Bump strictly past the row's current updatedAt so the edit wins the server's
+	// last-write-wins gate even when the stored value came from the server clock
+	// (bank-synced rows) and the browser clock lags behind it.
+	const current = await db.transactions.get(id);
+	const updatedAt = Math.max(Date.now(), (current?.updatedAt ?? 0) + 1);
+	const updated = await db.transactions.update(id, { ...changes, updatedAt });
+	requestSync();
+	return updated;
 }
 
 export function setTransactionHidden(id: string, hidden: boolean) {

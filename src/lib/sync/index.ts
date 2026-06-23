@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { sync } from './engine';
+import { migratePushCursor, sync } from './engine';
 
 const INTERVAL_MS = 45_000;
 const DEBOUNCE_MS = 1_500;
@@ -18,7 +18,7 @@ export function requestSync(): void {
 // Start the background sync loop. Safe to call once from the root layout's onMount.
 export function startSync(): void {
 	if (!browser || interval) return;
-	void sync();
+	void migratePushCursor().then(() => sync());
 	interval = setInterval(() => void sync(), INTERVAL_MS);
 	document.addEventListener('visibilitychange', () => {
 		if (document.visibilityState === 'visible') void sync();

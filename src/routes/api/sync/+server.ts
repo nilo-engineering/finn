@@ -63,8 +63,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		await client.query('BEGIN');
 		for (const table of TABLES) {
-			for (const row of body.changes?.[table] ?? []) {
-				const { text, values } = buildUpsert(table, row as Record<string, unknown>);
+			const rows = (body.changes?.[table] ?? []) as Record<string, unknown>[];
+			// Upsert in multi-row batches: one round-trip per chunk instead of per row,
+			// so a large push (full re-sync, CSV import) doesn't fan out into hundreds
+			// of sequential queries against a remote DB. Chunk size keeps each statement
+			// under Postgres's 65535 bound-parameter limit.
+			const perChunk = Math.max(1, Math.floor(65535 / COLUMNS[table].length));
+			for (let i = 0; i < rows.length; i += perChunk) {
+				const { text, values } = buildUpsert(table, rows.slice(i, i + perChunk));
 				await client.query(text, values);
 			}
 		}
@@ -80,20 +86,26 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 function buildUpsert(
 	table: Table,
-	row: Record<string, unknown>
+	rows: Record<string, unknown>[]
 ): { text: string; values: unknown[] } {
 	const cols = COLUMNS[table];
 	const colList = cols.map(q).join(', ');
-	const placeholders = cols.map((_, i) => `$${i + 1}`).join(', ');
+	const values: unknown[] = [];
+	const tuples = rows.map((row, r) => {
+		const placeholders = cols.map((col, c) => {
+			values.push(toDbValue(col, row[col]));
+			return `$${r * cols.length + c + 1}`;
+		});
+		return `(${placeholders.join(', ')})`;
+	});
 	const updates = cols
 		.filter((c) => c !== 'id')
 		.map((c) => `${q(c)} = EXCLUDED.${q(c)}`)
 		.join(', ');
 	const text =
-		`INSERT INTO ${table} (${colList}) VALUES (${placeholders}) ` +
+		`INSERT INTO ${table} (${colList}) VALUES ${tuples.join(', ')} ` +
 		`ON CONFLICT (id) DO UPDATE SET ${updates} ` +
 		`WHERE EXCLUDED."updatedAt" > ${table}."updatedAt"`;
-	const values = cols.map((c) => toDbValue(c, row[c]));
 	return { text, values };
 }
 

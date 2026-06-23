@@ -12,11 +12,15 @@ export function addCategory(cat: Omit<Category, 'id' | 'updatedAt' | 'deleted'>)
 		});
 }
 
-export function updateCategory(id: string, changes: Partial<Category>) {
-	return db.categories.update(id, { ...changes, updatedAt: Date.now() }).then((updated) => {
-		requestSync();
-		return updated;
-	});
+export async function updateCategory(id: string, changes: Partial<Category>) {
+	// Bump strictly past the row's current updatedAt so the edit wins the server's
+	// last-write-wins gate even when the stored value came from the server clock
+	// (bank-synced rows) and the browser clock lags behind it.
+	const current = await db.categories.get(id);
+	const updatedAt = Math.max(Date.now(), (current?.updatedAt ?? 0) + 1);
+	const updated = await db.categories.update(id, { ...changes, updatedAt });
+	requestSync();
+	return updated;
 }
 
 // Soft delete: keep the row as a tombstone so the deletion syncs to the server.

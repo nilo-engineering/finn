@@ -27,6 +27,17 @@ async function setCursor(key: string, value: number): Promise<void> {
 	await db.syncMeta.put({ key, value });
 }
 
+// One-time repair: older builds advanced lastPushedAt to the server's clock, which
+// under server clock skew could park the cursor ahead of local edits and strand them
+// unpushed (a stuck categorization never reaching the backend). Reset the push cursor
+// once so every local row re-uploads; the server's last-write-wins upsert makes the
+// re-push idempotent for rows it already has.
+export async function migratePushCursor(): Promise<void> {
+	if (await getCursor('pushCursorResetV1')) return;
+	await setCursor('lastPushedAt', 0);
+	await setCursor('pushCursorResetV1', 1);
+}
+
 // Upload every local row changed since lastPushedAt; the server applies LWW.
 async function push(): Promise<void> {
 	const since = await getCursor('lastPushedAt');
@@ -35,7 +46,8 @@ async function push(): Promise<void> {
 		db.categories.where('updatedAt').above(since).toArray(),
 		db.transactions.where('updatedAt').above(since).toArray()
 	]);
-	if (accounts.length + categories.length + transactions.length === 0) return;
+	const rows = [...accounts, ...categories, ...transactions];
+	if (rows.length === 0) return;
 
 	const res = await fetch('/api/sync', {
 		method: 'POST',
@@ -43,8 +55,11 @@ async function push(): Promise<void> {
 		body: JSON.stringify({ changes: { accounts, categories, transactions } })
 	});
 	assertOk(res, 'push');
-	const { serverTime } = (await res.json()) as { serverTime: number };
-	await setCursor('lastPushedAt', serverTime);
+	// Advance the cursor in the same clock as `updatedAt` (the client's), not the
+	// server's serverTime — otherwise server clock skew can park the cursor ahead of
+	// later local edits and they'd never be pushed.
+	const highWater = rows.reduce((max, r) => Math.max(max, r.updatedAt), since);
+	await setCursor('lastPushedAt', highWater);
 }
 
 // Download server changes since lastPulledAt and apply the winners into Dexie.
