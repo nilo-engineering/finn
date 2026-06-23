@@ -28,6 +28,10 @@
 	let method = $state(''); // '' | 'Credit' | 'Debit' | ...
 	let account = $state(''); // '' | accountName
 	let month = $state(''); // '' | monthLabel
+	// Yield credits flood the list with noise, so hide them unless explicitly toggled on.
+	let showYield = $state(false);
+
+	const YIELD_TITLE = 'ValorRendimentoSaldoRemunerado';
 
 	const directionOptions = [
 		{ value: 'in', label: 'Money in' },
@@ -49,6 +53,7 @@
 	const filtered = $derived.by(() => {
 		const q = search.trim().toLowerCase();
 		return transactions.filter((t) => {
+			if (!showYield && t.title === YIELD_TITLE) return false;
 			if (direction && t.direction !== direction) return false;
 			if (method && t.method !== method) return false;
 			if (account && t.accountName !== account) return false;
@@ -163,6 +168,16 @@
 					<FilterPill label="Method" bind:value={method} options={methodOptions} />
 					<FilterPill label="Account" bind:value={account} options={accountOptions} />
 					<FilterPill label="Month" bind:value={month} options={monthOptions} />
+					<button
+						type="button"
+						onclick={() => (showYield = !showYield)}
+						aria-pressed={showYield}
+						class="rounded-full px-3 py-1 text-sm transition-colors {showYield
+							? 'bg-primary text-white'
+							: 'text-ink/50 hover:bg-ink/5 hover:text-ink'}"
+					>
+						Yield credits
+					</button>
 					{#if anyActive}
 						<button
 							type="button"
