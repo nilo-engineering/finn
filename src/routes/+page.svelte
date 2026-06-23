@@ -10,13 +10,23 @@
 	import bank from 'iconoir/icons/bank.svg?raw';
 	import importIcon from 'iconoir/icons/import.svg?raw';
 	import cloudSync from 'iconoir/icons/cloud-sync.svg?raw';
+	import refreshDouble from 'iconoir/icons/refresh-double.svg?raw';
 	import logOut from 'iconoir/icons/log-out.svg?raw';
+	import { fullSync } from '$lib/sync/engine';
 	import { budgetBars, periodOptions } from '$lib/services/dashboard';
 
 	let selected = $state('Year');
 	let modalOpen = $state(false);
+	let syncing = $state(false);
 	const bars = budgetBars();
 	const view = $derived($bars?.[selected]);
+
+	async function forceSync() {
+		if (syncing) return;
+		syncing = true;
+		await fullSync();
+		syncing = false;
+	}
 
 	async function logout() {
 		await fetch('/logout', { method: 'POST' });
@@ -30,6 +40,9 @@
 		<div class="mb-8 flex items-center justify-between">
 			<h1 class="text-2xl font-semibold text-primary-deep">Finn</h1>
 			<div class="flex items-center gap-1">
+				<button type="button" onclick={forceSync} disabled={syncing} aria-label="Force sync" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink disabled:opacity-50">
+					<Icon src={refreshDouble} class="h-5 w-5 {syncing ? 'animate-spin' : ''}" />
+				</button>
 				<a href={resolve('/transactions')} aria-label="All transactions" class="flex h-9 w-9 items-center justify-center rounded-full text-ink/50 hover:bg-ink/5 hover:text-ink">
 					<Icon src={list} class="h-5 w-5" />
 				</a>
