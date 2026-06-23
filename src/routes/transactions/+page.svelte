@@ -33,6 +33,8 @@
 	let showYield = $state(false);
 	// Future-dated (scheduled/not-yet-settled) transactions are hidden unless toggled on.
 	let showFuture = $state(false);
+	// User-hidden transactions are excluded unless toggled on.
+	let showHidden = $state(false);
 
 	const YIELD_TITLE = 'ValorRendimentoSaldoRemunerado';
 	// Sentinel filter value for transactions with no category assigned.
@@ -69,6 +71,7 @@
 		return transactions.filter((t) => {
 			if (!showYield && t.title === YIELD_TITLE) return false;
 			if (!showFuture && t.isFuture) return false;
+			if (!showHidden && t.hidden) return false;
 			if (direction && t.direction !== direction) return false;
 			if (method && t.method !== method) return false;
 			if (account && t.accountName !== account) return false;
@@ -207,6 +210,16 @@
 							: 'text-ink/50 hover:bg-ink/5 hover:text-ink'}"
 					>
 						Future
+					</button>
+					<button
+						type="button"
+						onclick={() => (showHidden = !showHidden)}
+						aria-pressed={showHidden}
+						class="rounded-full px-3 py-1 text-sm transition-colors {showHidden
+							? 'bg-primary text-white'
+							: 'text-ink/50 hover:bg-ink/5 hover:text-ink'}"
+					>
+						Hidden
 					</button>
 					{#if anyActive}
 						<button
