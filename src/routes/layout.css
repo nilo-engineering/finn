@@ -2,17 +2,4 @@
 
 @theme {
 	--font-sans: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
-
-	--color-primary: #3da9e0;
-	--color-primary-deep: #1b4f72;
-	--color-accent: #7fb069;
-	--color-alert: #e07856;
-	--color-highlight: #f4d35e;
-	--color-background: #fdfcf7;
-	--color-ink: #2c3e50;
-}
-
-html,
-body {
-	background-color: var(--color-background);
 }
