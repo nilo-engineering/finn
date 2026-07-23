@@ -4,3 +4,7 @@
 	--font-sans: 'Fredoka', ui-sans-serif, system-ui, sans-serif;
 	--color-accent: #f4511e;
 }
+
+body {
+	color: #1a1a1a;
+}

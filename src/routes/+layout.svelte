@@ -4,12 +4,18 @@
 	import { page } from '$app/state';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import BottomNav from '$lib/components/BottomNav.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import MonthNav from '$lib/components/MonthNav.svelte';
 	import './layout.css';
 
-	let { children } = $props();
+	let { children, data } = $props();
 </script>
 
 <svelte:head><title>Finn</title></svelte:head>
+
+<Header>
+	<MonthNav {...data.monthNav} />
+</Header>
 
 <main class="app-main">
 	{@render children()}

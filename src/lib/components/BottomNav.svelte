@@ -60,7 +60,7 @@
 	}
 
 	.tab {
-		@apply flex flex-1 flex-col items-center justify-center gap-1 border-t-3 border-transparent text-[#1a1a1a] no-underline;
+		@apply flex flex-1 flex-col items-center justify-center gap-1 border-t-3 border-transparent no-underline;
 	}
 
 	.tab[aria-current='page'] {
