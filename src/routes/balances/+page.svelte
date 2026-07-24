@@ -15,7 +15,9 @@
 
 <div class="head">
 	<span class="head-day">day</span>
-	<MovementBottomSheet month={data.month} selected={data.movement} />
+	<div class="head-movement">
+		<MovementBottomSheet month={data.month} selected={data.movement} />
+	</div>
 	<span class="head-balance">balance</span>
 </div>
 
@@ -37,16 +39,20 @@
 	}
 
 	.head {
-		@apply sticky z-30 flex border-b border-[#cccccc] bg-white py-2 text-lg font-semibold text-[#8a8a8a];
+		@apply sticky z-30 flex border-b border-[#cccccc] bg-white py-2 font-semibold text-[#8a8a8a];
 		top: calc(5rem + env(safe-area-inset-top) - 1px);
 	}
 
 	.head-day {
-		@apply flex w-15 shrink-0 items-center justify-center;
+		@apply flex w-12 shrink-0 items-center justify-center;
+	}
+
+	.head-movement {
+		@apply flex w-45 shrink-0 justify-center;
 	}
 
 	.head-balance {
-		@apply flex flex-1 items-center justify-end px-4 pl-6;
+		@apply flex flex-1 items-center justify-end px-3 pl-6;
 	}
 
 	.day {
@@ -60,7 +66,7 @@
 	}
 
 	.date {
-		@apply flex w-12 shrink-0 items-start justify-center text-lg tabular-nums leading-none pt-3;
+		@apply flex w-12 shrink-0 items-start justify-center tabular-nums leading-none pt-3;
 	}
 
 	.date.is-weekend {
@@ -72,6 +78,6 @@
 	}
 
 	.balance {
-		@apply flex flex-1 items-start justify-end p-3 text-lg leading-none tabular-nums;
+		@apply flex flex-1 items-start justify-end p-3 leading-none tabular-nums;
 	}
 </style>

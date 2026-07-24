@@ -56,7 +56,7 @@
 	}
 
 	.entry {
-		@apply flex items-center gap-2 p-3 text-lg leading-none;
+		@apply flex items-center gap-2 p-3 leading-none;
 	}
 
 	.is-zero .badge,

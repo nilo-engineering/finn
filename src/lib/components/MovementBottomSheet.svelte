@@ -78,7 +78,7 @@
 	@reference '../../routes/layout.css';
 
 	button {
-		@apply mx-4 flex w-42 cursor-pointer items-center gap-2 rounded-full border-2 border-[#cccccc] bg-white px-4 py-2 text-lg leading-none font-semibold text-[#8a8a8a];
+		@apply flex w-42 cursor-pointer items-center gap-1 rounded-full border-2 border-[#cccccc] bg-white px-2 py-1 leading-none font-semibold text-[#8a8a8a];
 	}
 
 	span {
