@@ -25,37 +25,37 @@
 	const options = $derived([
 		{
 			value: 'in',
-			label: 'in',
+			title: 'in',
 			href: resolve(`/balances?month=${month}&movement=in`),
 			asset: { icon: inIcon, backgroundColor: '#16a34a', color: 'white' }
 		},
 		{
 			value: 'out',
-			label: 'out',
+			title: 'out',
 			href: resolve(`/balances?month=${month}&movement=out`),
 			asset: { icon: outIcon, backgroundColor: '#dc2626', color: 'white' }
 		},
 		{
 			value: 'daily',
-			label: 'daily',
+			title: 'daily',
 			href: resolve(`/balances?month=${month}&movement=daily`),
 			asset: { icon: dailyIcon, backgroundColor: '#db2777', color: 'white' }
 		},
 		{
 			value: 'savings',
-			label: 'savings',
+			title: 'savings',
 			href: resolve(`/balances?month=${month}&movement=savings`),
 			asset: { icon: savingsIcon, backgroundColor: '#9fd24b', color: 'white' }
 		},
 		{
 			value: 'creditCard',
-			label: 'credit card',
+			title: 'credit card',
 			href: resolve(`/balances?month=${month}&movement=creditCard`),
 			asset: { icon: creditCardIcon, backgroundColor: '#a855f7', color: 'white' }
 		},
 		{
 			value: 'all',
-			label: 'all',
+			title: 'all',
 			href: resolve(`/balances?month=${month}&movement=all`),
 			asset: { icon: listIcon, backgroundColor: 'transparent', color: '#1a1a1a' }
 		}
@@ -68,7 +68,7 @@
 	{#if selectedOption}
 		<Badge {...selectedOption.asset} />
 	{/if}
-	<span>{selectedOption?.label ?? selected}</span>
+	<span>{selectedOption?.title ?? selected}</span>
 	<Icon svg={chevronIcon} size="1.25rem" />
 </button>
 

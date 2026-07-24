@@ -2,7 +2,9 @@
 	import type { BadgeProps } from './Badge.svelte';
 
 	export interface Option {
-		label: string;
+		title: string;
+		/** Optional secondary line shown in grey below the title. */
+		description?: string;
 		/** Optional leading badge. */
 		asset?: BadgeProps;
 		href: ResolvedPathname;
@@ -46,7 +48,12 @@
 						{#if option.asset}
 							<Badge {...option.asset} />
 						{/if}
-						<span class="option-label">{option.label}</span>
+						<span class="option-text">
+							<span class="option-title">{option.title}</span>
+							{#if option.description}
+								<span class="option-description">{option.description}</span>
+							{/if}
+						</span>
 					</a>
 				</li>
 			{/each}
@@ -109,7 +116,15 @@
 		@apply bg-[#f2f2f2];
 	}
 
-	.option-label {
+	.option-text {
+		@apply flex flex-col gap-1;
+	}
+
+	.option-title {
 		@apply leading-none font-semibold text-xl;
+	}
+
+	.option-description {
+		@apply text-sm leading-none text-[#8a8a8a];
 	}
 </style>
