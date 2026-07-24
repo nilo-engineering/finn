@@ -30,7 +30,8 @@ export const load: PageServerLoad = ({ url }) => {
 			savings: mov(savings),
 			creditCard: mov(creditCard),
 			balance: money(balance),
-			state: state(balance)
+			state: state(balance),
+			today: d === today
 		};
 	});
 
