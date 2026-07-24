@@ -23,14 +23,17 @@ export const load: PageServerLoad = ({ url }) => {
 		const savings = d % 7 === 0 ? 150 : 0;
 		const creditCard = d % 4 === 0 ? (d * 13) % 200 : 0;
 		balance += inc - out - daily - savings - creditCard;
+		const weekday = new Date(viewed.year, viewed.month - 1, d).getDay();
 		return {
+			weekend: weekday === 0 || weekday === 6,
 			in: mov(inc),
 			out: mov(out),
 			daily: mov(daily),
 			savings: mov(savings),
 			creditCard: mov(creditCard),
 			balance: money(balance),
-			state: state(balance)
+			state: state(balance),
+			today: d === today
 		};
 	});
 

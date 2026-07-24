@@ -42,7 +42,7 @@
 		<ul class="options">
 			{#each options as option, i (i)}
 				<li>
-					<a class="option" href={option.href}>
+					<a class="option" href={option.href} data-sveltekit-noscroll>
 						{#if option.asset}
 							<Badge {...option.asset} />
 						{/if}

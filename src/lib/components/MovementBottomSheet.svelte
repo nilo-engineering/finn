@@ -48,9 +48,9 @@
 			asset: { icon: savingsIcon, backgroundColor: '#9fd24b', color: 'white' }
 		},
 		{
-			value: 'credit-card',
+			value: 'creditCard',
 			label: 'credit card',
-			href: resolve(`/balances?month=${month}&movement=credit-card`),
+			href: resolve(`/balances?month=${month}&movement=creditCard`),
 			asset: { icon: creditCardIcon, backgroundColor: '#a855f7', color: 'white' }
 		},
 		{
