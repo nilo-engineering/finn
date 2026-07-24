@@ -56,7 +56,7 @@
 	@reference '../../routes/layout.css';
 
 	.bottom-nav {
-		@apply fixed inset-x-0 bottom-0 z-50 flex h-20 items-stretch border-t border-[#ececec] bg-white pb-[calc(1rem+env(safe-area-inset-bottom))];
+		@apply fixed inset-x-0 bottom-0 z-50 flex h-20 items-stretch border-t border-[#cccccc] bg-white pb-[calc(1rem+env(safe-area-inset-bottom))];
 	}
 
 	.tab {

@@ -10,23 +10,31 @@
 		label,
 		current,
 		prev,
-		next
-	}: { label: string; current: string; prev: string; next: string } = $props();
+		next,
+		movement
+	}: { label: string; current: string; prev: string; next: string; movement: string | null } =
+		$props();
 
+	// Preserve the selected movement filter when navigating between months.
+	const movementQuery = $derived(movement ? `&movement=${movement}` : '');
 </script>
 
-<a class="icon-link" href={resolve(`/balances?month=${current}#today`)} aria-label="Go to current month">
+<a
+	class="icon-link"
+	href={resolve(`/balances?month=${current}${movementQuery}#today`)}
+	aria-label="Go to current month"
+>
 	<img class="calendar-icon" src={calendarIcon} alt="" />
 </a>
 
 <div class="pager">
-	<a class="icon-link" href={resolve(`/balances?month=${prev}`)} aria-label="Previous month">
+	<a class="icon-link" href={resolve(`/balances?month=${prev}${movementQuery}`)} aria-label="Previous month">
 		<Icon svg={leftIcon} />
 	</a>
 
-	<a class="month" href={resolve(`/balances?month=${current}`)}>{label}</a>
+	<a class="month" href={resolve(`/balances?month=${current}${movementQuery}`)}>{label}</a>
 
-	<a class="icon-link" href={resolve(`/balances?month=${next}`)} aria-label="Next month">
+	<a class="icon-link" href={resolve(`/balances?month=${next}${movementQuery}`)} aria-label="Next month">
 		<Icon svg={rightIcon} />
 	</a>
 </div>

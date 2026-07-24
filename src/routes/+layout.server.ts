@@ -8,7 +8,8 @@ export const load: LayoutServerLoad = ({ url }) => {
 			label: label(viewed),
 			current: fmt(currentMonth()),
 			prev: fmt(addMonths(viewed, -1)),
-			next: fmt(addMonths(viewed, 1))
+			next: fmt(addMonths(viewed, 1)),
+			movement: url.searchParams.get('movement')
 		}
 	};
 };

@@ -4,6 +4,7 @@ import type { PageServerLoad } from './$types';
 // real aggregation will return so the page and its markup stay unchanged.
 export const load: PageServerLoad = ({ url }) => {
 	const viewed = parseMonth(url.searchParams.get('month'));
+	const movement = url.searchParams.get('movement') ?? 'all';
 	const now = currentMonth();
 	const daysInMonth = new Date(viewed.year, viewed.month, 0).getDate();
 
@@ -33,7 +34,7 @@ export const load: PageServerLoad = ({ url }) => {
 		};
 	});
 
-	return { month: fmt(viewed), today, days };
+	return { month: fmt(viewed), today, days, movement };
 };
 
 // A movement cell carries its own zero flag so the UI can de-emphasize empty categories

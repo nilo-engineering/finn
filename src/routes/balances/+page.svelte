@@ -5,31 +5,33 @@
 	import dailyIcon from 'iconoir/icons/regular/coins-swap.svg?raw';
 	import savingsIcon from 'iconoir/icons/regular/piggy-bank.svg?raw';
 	import creditCardIcon from 'iconoir/icons/regular/credit-card.svg?raw';
+	import MovementBottomSheet from '$lib/components/MovementBottomSheet.svelte';
 
 	let { data } = $props();
 
-	const stateColors: Record<'good' | 'ok' | 'alert' | 'danger' | 'calamity', string> = {
-		good: '#4ade80',
-		ok: '#bbf7d0',
-		alert: '#fef08a',
-		danger: '#fca5a5',
-		calamity: '#e05252'
-	};
-
 	type DayKey = 'in' | 'out' | 'daily' | 'savings' | 'creditCard';
+	type MovementMetadata = { key: DayKey; icon: string; label: string; color: string };
 
-	const stack: { key: DayKey; icon: string; label: string; color: string }[] = [
+	const stack: MovementMetadata[] = [
 		{ key: 'in', icon: inIcon, label: 'In', color: '#16a34a' },
 		{ key: 'out', icon: outIcon, label: 'Out', color: '#dc2626' },
 		{ key: 'daily', icon: dailyIcon, label: 'Daily', color: '#db2777' },
 		{ key: 'savings', icon: savingsIcon, label: 'Savings', color: '#9fd24b' },
 		{ key: 'creditCard', icon: creditCardIcon, label: 'Credit card', color: '#a855f7' }
 	];
+
+	const stateColors = {
+		good: '#4ade80',
+		ok: '#bbf7d0',
+		alert: '#fef08a',
+		danger: '#fca5a5',
+		calamity: '#e05252'
+	};
 </script>
 
 <div class="head">
 	<span class="head-day">day</span>
-	<span class="head-mov">mov</span>
+	<MovementBottomSheet month={data.month} selected={data.movement} />
 	<span class="head-balance">balance</span>
 </div>
 
@@ -66,7 +68,7 @@
 
 	/* Pins directly under the app header (h-5.5rem) so the column labels stay visible while scrolling. */
 	.head {
-		@apply sticky z-30 flex border-b border-[#ececec] bg-white py-2 text-lg font-semibold text-[#8a8a8a];
+		@apply sticky z-30 flex border-b border-[#cccccc] bg-white py-2 text-lg font-semibold text-[#8a8a8a];
 		top: calc(5.5rem + env(safe-area-inset-top));
 	}
 
@@ -74,16 +76,12 @@
 		@apply flex w-15 shrink-0 items-center justify-center;
 	}
 
-	.head-mov {
-		@apply flex w-50 items-center px-4;
-	}
-
 	.head-balance {
 		@apply flex flex-1 items-center justify-end px-4 pl-6;
 	}
 
 	.day {
-		@apply flex border-b border-[#ececec];
+		@apply flex border-b border-[#cccccc];
 	}
 
 	.is-today {
@@ -101,7 +99,7 @@
 	}
 
 	.stack {
-		@apply m-0 flex w-50 list-none flex-col justify-center divide-y divide-[#ececec] border-x border-[#ececec];
+		@apply m-0 flex w-50 list-none flex-col justify-center divide-y divide-[#cccccc] border-l border-[#cccccc];
 	}
 
 	.entry {
