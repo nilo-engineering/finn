@@ -6,9 +6,11 @@
 		size?: string;
 		/** Stroke width baked into the mask (iconoir ships at 1.5). */
 		strokeWidth?: number;
+		/** Icon color; defaults to the inherited text color. */
+		color?: string;
 	}
 
-	let { svg, size = '1.5rem', strokeWidth = 2 }: Props = $props();
+	let { svg, size = '1.5rem', strokeWidth = 2, color = 'currentColor' }: Props = $props();
 
 	// Mask can't be restyled via CSS, so bake the stroke width into the SVG markup.
 	const src = $derived(
@@ -17,7 +19,13 @@
 	);
 </script>
 
-<span class="icon" style:--icon-size={size} style:--icon-src={`url("${src}")`} aria-hidden="true"></span>
+<span
+	class="icon"
+	style:--icon-size={size}
+	style:--icon-src={`url("${src}")`}
+	style:color
+	aria-hidden="true"
+></span>
 
 <style>
 	@reference '../../routes/layout.css';

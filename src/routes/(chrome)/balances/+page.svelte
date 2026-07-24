@@ -32,7 +32,7 @@
 </ul>
 
 <style>
-	@reference '../layout.css';
+	@reference '../../layout.css';
 
 	.days {
 		@apply m-0 list-none p-0;
