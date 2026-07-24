@@ -22,7 +22,7 @@
 <ul class="days">
 	{#each data.days as day, i (i)}
 		<li class="day" class:is-today={day.today} id={day.today ? 'today' : undefined}>
-			<span class="date">{i + 1}</span>
+			<span class="date" class:is-weekend={day.weekend}>{i + 1}</span>
 			<Movements {day} movement={data.movement} />
 			<span class="balance" style:background-color={balanceColors[day.state]}>{day.balance}</span>
 		</li>
@@ -36,10 +36,9 @@
 		@apply m-0 list-none p-0;
 	}
 
-	/* Pins directly under the app header (h-5.5rem) so the column labels stay visible while scrolling. */
 	.head {
 		@apply sticky z-30 flex border-b border-[#cccccc] bg-white py-2 text-lg font-semibold text-[#8a8a8a];
-		top: calc(5.5rem + env(safe-area-inset-top));
+		top: calc(5rem + env(safe-area-inset-top) - 1px);
 	}
 
 	.head-day {
@@ -51,17 +50,21 @@
 	}
 
 	.day {
-		@apply flex border-b border-[#cccccc];
+		@apply flex border-b border-[#999999];
 	}
 
 	.is-today {
-		@apply border-y border-current;
-		/* Clear the app header plus the sticky column header when jumping to #today. */
-		scroll-margin-top: calc(5.5rem + 2.5rem + env(safe-area-inset-top));
+		@apply border-b border-current;
+		/* Clear the app header (5rem) plus the sticky column header (~3.5rem, sized by its Movement filter button) when jumping to #today. */
+		scroll-margin-top: calc(5rem + 3.5rem + env(safe-area-inset-top));
 	}
 
 	.date {
-		@apply flex w-15 shrink-0 items-start justify-center text-lg tabular-nums;
+		@apply flex w-12 shrink-0 items-start justify-center text-lg tabular-nums leading-none pt-3;
+	}
+
+	.date.is-weekend {
+		@apply bg-[#f2f2f2];
 	}
 
 	.is-today .date {
@@ -69,6 +72,6 @@
 	}
 
 	.balance {
-		@apply flex flex-1 items-start justify-end p-4 pl-6 text-lg leading-none tabular-nums;
+		@apply flex flex-1 items-start justify-end p-3 text-lg leading-none tabular-nums;
 	}
 </style>

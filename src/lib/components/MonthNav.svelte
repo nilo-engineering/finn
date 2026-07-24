@@ -55,11 +55,11 @@
 	}
 
 	.calendar-icon {
-		@apply size-10.5;
+		@apply size-9;
 	}
 
 	.overview-icon {
-		@apply size-10.5;
+		@apply size-9;
 	}
 
 	.month {

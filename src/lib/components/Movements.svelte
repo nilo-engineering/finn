@@ -52,11 +52,11 @@
 	@reference '../../routes/layout.css';
 
 	.stack {
-		@apply m-0 flex w-50 list-none flex-col justify-center divide-y divide-[#cccccc] border-l border-[#cccccc];
+		@apply m-0 flex w-45 list-none flex-col justify-center divide-y divide-[#cccccc] border-l border-[#cccccc];
 	}
 
 	.entry {
-		@apply flex items-center gap-2 px-4 py-4 text-lg leading-none;
+		@apply flex items-center gap-2 p-3 text-lg leading-none;
 	}
 
 	.is-zero .badge,
