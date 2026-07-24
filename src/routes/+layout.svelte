@@ -9,15 +9,17 @@
 	import './layout.css';
 
 	let { children, data } = $props();
+
+	const headerHeight = '5rem';
 </script>
 
 <svelte:head><title>Finn</title></svelte:head>
 
-<Header>
+<Header height={headerHeight}>
 	<MonthNav {...data.monthNav} />
 </Header>
 
-<main class="app-main">
+<main class="app-main" style:--header-h={headerHeight}>
 	{@render children()}
 </main>
 

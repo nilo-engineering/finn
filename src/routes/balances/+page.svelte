@@ -40,7 +40,8 @@
 
 	.head {
 		@apply sticky z-30 flex border-b border-[#cccccc] bg-white py-2 font-semibold text-[#8a8a8a];
-		top: calc(5rem + env(safe-area-inset-top) - 1px);
+		/* -1px so the head overlaps the header's shared bottom border. */
+		top: calc(var(--header-h) + env(safe-area-inset-top) - 1px);
 	}
 
 	.head-day {
@@ -61,8 +62,8 @@
 
 	.is-today {
 		@apply border-b border-current;
-		/* Clear the app header (5rem) plus the sticky column header (~3.5rem, sized by its Movement filter button) when jumping to #today. */
-		scroll-margin-top: calc(5rem + 3.5rem + env(safe-area-inset-top));
+		/* Clear the app header plus the sticky column header (~3.5rem, sized by its Movement filter button) when jumping to #today. */
+		scroll-margin-top: calc(var(--header-h) + 3.5rem + env(safe-area-inset-top));
 	}
 
 	.date {

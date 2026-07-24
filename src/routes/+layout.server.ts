@@ -2,13 +2,18 @@ import type { LayoutServerLoad } from './$types';
 import { getLocale } from '$lib/paraglide/runtime';
 
 export const load: LayoutServerLoad = ({ url }) => {
-	const viewed = parseMonth(url.searchParams.get('month'));
+	const selectedMonth = parseMonth(url.searchParams.get('month'));
+	const movement = url.searchParams.get('movement')
+	const currentQuery = buildMonthQuery(currentMonth())
+	const prevQuery = buildMonthQuery(addMonths(selectedMonth, -1))
+	const nextQuery = buildMonthQuery(addMonths(selectedMonth, 1))
+
 	return {
 		monthNav: {
-			label: label(viewed),
-			current: fmt(currentMonth()),
-			prev: fmt(addMonths(viewed, -1)),
-			next: fmt(addMonths(viewed, 1)),
+			label: label(selectedMonth),
+			current: appendMovementQuery(currentQuery, movement, true),
+			prev: appendMovementQuery(prevQuery, movement, false),
+			next: appendMovementQuery(nextQuery, movement, false),
 			movement: url.searchParams.get('movement')
 		}
 	};
@@ -37,8 +42,14 @@ function addMonths({ year, month }: Month, delta: number): Month {
 	return { year: Math.floor(zero / 12), month: (zero % 12) + 1 };
 }
 
-function fmt({ year, month }: Month): string {
-	return `${year}-${String(month).padStart(2, '0')}`;
+function buildMonthQuery({ year, month }: Month): string {
+	return `month=${year}-${String(month).padStart(2, '0')}`;
+}
+
+function appendMovementQuery(query: string, movement: string | null, today: boolean) {
+	const movementQuery = movement ? `&movement=${movement}` : ''
+	const todayAnchor = today ? '#today' : ''
+	return `${query}${movementQuery}${todayAnchor}`
 }
 
 function label({ year, month }: Month): string {
