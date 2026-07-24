@@ -4,15 +4,11 @@
 	import { page } from '$app/state';
 	import * as m from '$lib/paraglide/messages';
 	import Icon from './Icon.svelte';
+	import AddBottomSheet from './AddBottomSheet.svelte';
 	import balancesIcon from 'iconoir/icons/table-2-columns.svg?raw';
 	import totalsIcon from 'iconoir/icons/calculator.svg?raw';
 	import tagsIcon from 'iconoir/icons/label.svg?raw';
 	import menuIcon from 'iconoir/icons/menu-scale.svg?raw';
-	import plusIcon from 'iconoir/icons/plus.svg?raw';
-
-	function handleAdd() {
-		console.log('add tapped');
-	}
 
 	function getAriaCurrent(path: Pathname): 'page' | undefined {
 		const resolved = resolve(path);
@@ -36,9 +32,7 @@
 	</a>
 
 	<div class="fab-slot">
-		<button class="fab" type="button" aria-label="Add" onclick={handleAdd}>
-			<Icon svg={plusIcon} size="1.75rem" />
-		</button>
+		<AddBottomSheet />
 	</div>
 
 	<a class="tab" href={resolve('/tags')} aria-current={getAriaCurrent('/tags')}>
@@ -73,9 +67,5 @@
 
 	.fab-slot {
 		@apply flex flex-1 items-center justify-center;
-	}
-
-	.fab {
-		@apply flex size-12 cursor-pointer items-center justify-center rounded-full border-none bg-[#111] text-white;
 	}
 </style>

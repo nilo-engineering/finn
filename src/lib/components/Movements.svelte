@@ -24,7 +24,7 @@
 {#snippet entry(cell: Cell, icon: string, label: string, color: string)}
 	<li class="entry" class:is-zero={cell.zero} aria-label={label}>
 		<span class="badge" style:background-color={cell.zero ? '#1a1a1a' : color}>
-			<Icon svg={icon} size="0.8rem" strokeWidth={4} />
+			<Icon svg={icon} size="0.8rem" strokeWidth={3} />
 		</span>
 		<span class="entry-value">{cell.display}</span>
 	</li>

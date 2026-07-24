@@ -16,7 +16,7 @@
 </script>
 
 <span class="badge" style:background-color={backgroundColor} style:color>
-	<Icon svg={icon} size="0.8rem" strokeWidth={4} />
+	<Icon svg={icon} size="0.8rem" strokeWidth={3} />
 </span>
 
 <style>
