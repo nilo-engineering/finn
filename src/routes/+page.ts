@@ -1,2 +1,5 @@
-// The page reads from IndexedDB (Dexie) via liveQuery, which is browser-only.
-export const ssr = false;
+import { redirect } from '@sveltejs/kit';
+
+export const load = () => {
+	redirect(307, '/balances#today');
+};

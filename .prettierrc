@@ -9,7 +9,7 @@
 			"files": "*.svelte",
 			"options": {
 				"parser": "svelte",
-				"printWidth": 9999
+				"printWidth": 100
 			}
 		}
 	],
