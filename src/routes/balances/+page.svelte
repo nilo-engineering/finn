@@ -106,7 +106,8 @@
 		@apply flex items-center gap-2 px-4 py-4 text-lg leading-none;
 	}
 
-	.is-zero {
+	.is-zero .badge,
+	.is-zero .entry-value {
 		@apply opacity-20;
 	}
 
